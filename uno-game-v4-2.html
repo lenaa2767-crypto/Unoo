@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#04040e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>🃏 أونو الصحة</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040e; --c1:#080818; --c2:#0e0e24; --brd:rgba(255,255,255,.07); --text:#f0eeff; --muted:rgba(240,238,255,.44);
+  --food:#ff3a5c; --food2:#ff8098; --foodg:linear-gradient(135deg,#7a0022,#cc1040,#ff3a5c,#ff8098);
+  --water:#0a7aff; --water2:#60b8ff; --waterg:linear-gradient(135deg,#003080,#005acc,#0a7aff,#60b8ff);
+  --move:#22d060; --move2:#80eaaa; --moveg:linear-gradient(135deg,#083820,#10682a,#22d060,#80eaaa);
+  --rest:#ffc800; --rest2:#ffe566; --restg:linear-gradient(135deg,#6a4400,#c07800,#ffc800,#ffe566);
+  --pur:#c050ff; --pur2:#e090ff; --purg:linear-gradient(135deg,#1a0038,#5a00a0,#c050ff,#e090ff);
+  --teal:#30e0ff; --pink:#ff2080; --grad:linear-gradient(135deg,#c050ff,#ff3a5c);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 60% at 15% 5%,rgba(192,80,255,.11) 0%,transparent 55%),
+  radial-gradient(ellipse 70% 50% at 88% 90%,rgba(255,58,92,.08) 0%,transparent 55%),
+  radial-gradient(ellipse 60% 60% at 50% 50%,rgba(10,122,255,.05) 0%,transparent 60%);}
+
+/* ── SCREENS ── */
+.scr{display:none;position:relative;z-index:1;min-height:100vh;flex-direction:column;}
+.scr.on{display:flex;}
+#sg{padding:0;}
+
+/* ── HOME ── */
+#sh{align-items:center;justify-content:center;padding:28px 18px;}
+.hi{width:100%;max-width:400px;text-align:center;}
+.h-logo{font-size:68px;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-5deg);}50%{transform:translateY(-12px) rotate(5deg);}}
+.h-title{font-family:'Cairo',sans-serif;font-size:clamp(26px,7vw,44px);font-weight:900;margin:8px 0 6px;line-height:1.2;
+  background:linear-gradient(135deg,#fff 0%,var(--rest) 25%,var(--food) 55%,var(--pur) 85%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.h-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.9;}
+.h-pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:22px;}
+.hp{border-radius:50px;padding:6px 14px;font-size:12px;font-weight:700;border:1px solid;}
+.hp-f{background:rgba(255,58,92,.12);border-color:rgba(255,58,92,.3);color:var(--food);}
+.hp-w{background:rgba(10,122,255,.12);border-color:rgba(10,122,255,.3);color:var(--water);}
+.hp-m{background:rgba(34,208,96,.12);border-color:rgba(34,208,96,.3);color:var(--move);}
+.hp-r{background:rgba(255,200,0,.12);border-color:rgba(255,200,0,.3);color:var(--rest);}
+.hp-s{background:rgba(192,80,255,.12);border-color:rgba(192,80,255,.3);color:var(--pur);}
+.fc{background:var(--c1);border:1px solid var(--brd);border-radius:20px;padding:20px 18px;margin-bottom:14px;text-align:right;}
+.fl{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;display:block;}
+.fi{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 14px;
+  font-family:'Tajawal',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;margin-bottom:10px;}
+.fi:last-child{margin-bottom:0;}
+.fi:focus{border-color:rgba(192,80,255,.45);}
+.fi::placeholder{color:var(--muted);}
+.bm{width:100%;padding:15px;border:none;border-radius:16px;font-family:'Tajawal',sans-serif;font-size:16px;font-weight:900;
+  cursor:pointer;background:var(--grad);color:#fff;box-shadow:0 8px 30px rgba(192,80,255,.4);transition:transform .2s;margin-bottom:10px;}
+.bm:active{transform:scale(.97);}
+.br{width:100%;padding:12px;border:1.5px solid rgba(48,224,255,.35);border-radius:14px;font-family:'Tajawal',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;background:rgba(48,224,255,.07);color:var(--teal);}
+.hn{font-size:11px;color:var(--muted);margin-top:12px;line-height:1.8;}
+
+/* ── ONBOARDING ── */
+#sob{align-items:center;justify-content:center;padding:28px 18px;}
+.ob-inner{width:100%;max-width:400px;text-align:center;}
+.ob-title{font-family:'Cairo',sans-serif;font-size:24px;font-weight:900;margin-bottom:8px;}
+.ob-sub{font-size:13px;color:var(--muted);margin-bottom:24px;line-height:1.8;}
+.goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.goal-btn{padding:20px 14px;border-radius:18px;border:2px solid transparent;cursor:pointer;font-family:'Tajawal',sans-serif;
+  font-size:14px;font-weight:900;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.goal-btn span:first-child{font-size:32px;}
+.goal-btn:hover{transform:scale(1.04);}
+.goal-btn.picked{box-shadow:0 0 0 3px rgba(255,255,255,.4);}
+.gb-f{background:var(--foodg);color:#fff;}
+.gb-w{background:var(--waterg);color:#fff;}
+.gb-m{background:var(--moveg);color:#fff;}
+.gb-r{background:var(--restg);color:#1a1a0a;}
+.ob-note{font-size:11px;color:var(--muted);margin-bottom:16px;}
+
+/* ── HEADER ── */
+.ghdr{display:flex;justify-content:space-between;align-items:center;
+  background:rgba(4,4,14,.92);border-bottom:1px solid var(--brd);
+  padding:11px 16px;position:sticky;top:0;z-index:10;backdrop-filter:blur(14px);}
+.glogo{font-size:15px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.gday{background:rgba(192,80,255,.18);border:1px solid rgba(192,80,255,.4);border-radius:50px;padding:4px 13px;font-size:12px;font-weight:700;color:var(--pur);}
+
+/* ── STATS ROW ── */
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.sb{background:var(--c1);border:1px solid var(--brd);border-radius:14px;padding:11px 7px;text-align:center;}
+.sv{font-size:22px;font-weight:900;display:block;}
+.sl{font-size:10px;color:var(--muted);}
+
+/* ── CALENDAR ── */
+.cal-wrap{margin-bottom:14px;}
+.cal-lbl{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:7px;}
+.cal-g{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cd{border-radius:8px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;transition:transform .2s;}
+.cd.dn{background:linear-gradient(135deg,rgba(34,208,96,.25),rgba(34,208,96,.15));color:var(--move);box-shadow:0 0 8px rgba(34,208,96,.15);}
+.cd.cur{background:var(--grad);color:#fff;box-shadow:0 0 10px rgba(192,80,255,.4);}
+.cd.ft{background:rgba(255,255,255,.04);color:var(--muted);}
+.cd.sk{background:rgba(255,58,92,.12);color:var(--food);}
+
+/* ── WEEKLY CHALLENGE ── */
+.wc-bar{background:linear-gradient(135deg,rgba(255,200,0,.1),rgba(255,80,130,.07));border:1px solid rgba(255,200,0,.3);
+  border-radius:14px;padding:12px 14px;margin-bottom:13px;display:none;}
+.wc-bar.show{display:flex;align-items:center;gap:10px;}
+.wc-ico{font-size:22px;}
+.wc-t{font-size:13px;font-weight:900;color:var(--rest);}
+.wc-s{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ── BONUS ── */
+.bonus{background:linear-gradient(135deg,rgba(255,200,0,.14),rgba(255,58,92,.08));
+  border:1px solid rgba(255,200,0,.35);border-radius:15px;padding:14px;text-align:center;margin-bottom:13px;display:none;}
+.bonus.show{display:block;animation:pop .4s ease;}
+@keyframes pop{from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);}}
+.bon-ico{font-size:30px;margin-bottom:5px;}
+.bon-t{font-size:14px;font-weight:900;color:var(--rest);}
+.bon-s{font-size:12px;color:var(--muted);margin-top:3px;}
+
+/* ── DECK CARD ── */
+.deck-wrap{margin-bottom:18px;}
+.deck-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.dk-lbl{font-size:12px;font-weight:700;color:var(--muted);}
+.dk-bdg{background:rgba(192,80,255,.18);border:1px solid rgba(192,80,255,.35);border-radius:50px;padding:3px 12px;font-size:11px;font-weight:700;color:var(--pur);}
+.deck-card{width:100%;background:linear-gradient(135deg,#06061a,#0a0a22,#100a28);
+  border:2px solid rgba(192,80,255,.4);border-radius:22px;
+  display:flex;align-items:center;justify-content:center;gap:18px;padding:22px 18px;cursor:pointer;
+  position:relative;overflow:hidden;transition:all .25s;
+  box-shadow:0 6px 30px rgba(192,80,255,.2),inset 0 1px 0 rgba(255,255,255,.06);}
+.deck-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(192,80,255,.08),rgba(255,58,92,.05),rgba(10,122,255,.05));pointer-events:none;}
+.deck-card::after{content:'';position:absolute;top:-60%;left:-60%;width:50%;height:220%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+  transform:rotate(25deg);animation:shimmer 3s infinite;}
+@keyframes shimmer{0%{left:-60%;}100%{left:160%;}}
+.deck-card:hover:not(.dis){transform:translateY(-4px);box-shadow:0 14px 44px rgba(192,80,255,.38);}
+.deck-card:active:not(.dis){transform:scale(.97);}
+.deck-card.dis{opacity:.4;cursor:not-allowed;}
+.dk-ico{font-size:44px;filter:drop-shadow(0 0 12px rgba(192,80,255,.7));position:relative;z-index:1;}
+.dk-info{position:relative;z-index:1;}
+.dk-txt{font-size:17px;font-weight:900;color:var(--pur2);margin-bottom:3px;}
+.dk-sub{font-size:12px;color:var(--muted);}
+
+/* ── TASK CARDS ── */
+.drawn-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;}
+.tc{border-radius:20px;overflow:hidden;position:relative;animation:slup .35s ease;
+  box-shadow:0 4px 20px rgba(0,0,0,.35);}
+@keyframes slup{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.tc-inner{background:var(--c1);padding:15px 15px 15px 0;}
+.tc-stripe{position:absolute;top:0;right:0;width:5px;height:100%;border-radius:0 20px 20px 0;}
+.tc-stripe-f{background:var(--foodg);}
+.tc-stripe-w{background:var(--waterg);}
+.tc-stripe-m{background:var(--moveg);}
+.tc-stripe-r{background:var(--restg);}
+.tc-stripe-s{background:var(--purg);}
+.tc.done-c .tc-inner{background:linear-gradient(135deg,rgba(34,208,96,.06),var(--c1));}
+.tc.skip-c .tc-inner{background:rgba(255,255,255,.02);opacity:.75;}
+.tc.later-c .tc-inner{background:linear-gradient(135deg,rgba(255,200,0,.05),var(--c1));}
+
+/* mini UNO card */
+.ucard{width:52px;height:78px;border-radius:11px;flex-shrink:0;margin-right:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.5);}
+.uc-oval{position:absolute;width:40px;height:64px;background:rgba(255,255,255,.13);border-radius:50%;transform:rotate(30deg);}
+.uc-n{position:relative;font-family:'Cairo',sans-serif;font-size:26px;font-weight:900;color:#fff;line-height:1;text-shadow:0 2px 6px rgba(0,0,0,.3);}
+.uc-i{position:relative;font-size:14px;margin-top:1px;}
+.uc-sp{position:relative;font-size:28px;}
+.uc-st{position:relative;font-size:9px;font-weight:900;color:rgba(255,255,255,.9);letter-spacing:.5px;margin-top:1px;}
+.uc-f{background:var(--foodg);border:2px solid rgba(255,140,140,.35);}
+.uc-w{background:var(--waterg);border:2px solid rgba(100,170,255,.35);}
+.uc-m{background:var(--moveg);border:2px solid rgba(120,240,160,.35);}
+.uc-r{background:var(--restg);border:2px solid rgba(255,220,80,.35);}
+.uc-s{background:var(--purg);border:2px solid rgba(220,140,255,.35);}
+
+.tc-head{display:flex;align-items:flex-start;padding-right:5px;}
+.tc-body{flex:1;min-width:0;}
+.tc-top{display:flex;align-items:center;gap:6px;margin-bottom:5px;flex-wrap:wrap;}
+.cat-bdg{border-radius:50px;padding:3px 9px;font-size:10px;font-weight:700;}
+.cbf{background:rgba(255,58,92,.15);color:var(--food);}
+.cbw{background:rgba(10,122,255,.15);color:var(--water);}
+.cbm{background:rgba(34,208,96,.15);color:var(--move);}
+.cbr{background:rgba(255,200,0,.15);color:var(--rest);}
+.cbs{background:rgba(192,80,255,.15);color:var(--pur2);}
+.lvl-t{font-size:10px;color:var(--muted);}
+.pts-bdg{margin-right:auto;margin-left:0;background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.25);
+  border-radius:50px;padding:2px 9px;font-size:10px;font-weight:900;color:var(--rest);}
+.tc-nm{font-size:15px;font-weight:900;margin-bottom:3px;line-height:1.3;}
+.tc-dc{font-size:12px;color:var(--muted);line-height:1.7;}
+
+/* alt */
+.alt-btn{display:block;font-size:11px;color:rgba(48,224,255,.7);cursor:pointer;margin-top:8px;font-weight:700;}
+.alt-box{background:rgba(48,224,255,.06);border:1px solid rgba(48,224,255,.18);border-radius:11px;padding:11px;margin-top:8px;display:none;}
+.alt-box.open{display:block;}
+.alt-ttl{font-size:11px;font-weight:700;color:var(--teal);margin-bottom:4px;}
+.alt-tx{font-size:12px;color:var(--muted);line-height:1.7;}
+.alt-cases{font-size:10px;color:rgba(48,224,255,.5);margin-top:4px;}
+
+/* buttons */
+.tc-btns{display:flex;flex-direction:column;gap:7px;margin-top:11px;}
+.tbtn{border:none;border-radius:13px;padding:12px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;cursor:pointer;transition:transform .15s;}
+.tbtn:active{transform:scale(.96);}
+.tb-ok{background:linear-gradient(135deg,var(--move),#00b860);color:#000;}
+.tb-alt{background:rgba(48,224,255,.1);color:var(--teal);border:1px solid rgba(48,224,255,.3)!important;}
+.tb-skip{background:rgba(255,255,255,.05);color:var(--muted);}
+
+/* result */
+.res-bdg{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;margin-top:4px;}
+.rb-ok{color:var(--move);}
+.rb-alt{color:var(--teal);}
+.rb-sk{color:var(--muted);}
+
+/* note */
+.note-row{display:flex;align-items:center;gap:6px;margin-top:8px;}
+.note-inp-sm{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  padding:8px 12px;font-family:'Tajawal',sans-serif;font-size:12px;color:var(--text);outline:none;direction:rtl;}
+.note-inp-sm:focus{border-color:rgba(48,224,255,.4);}
+.note-inp-sm::placeholder{color:var(--muted);}
+.note-save{padding:8px 14px;background:rgba(48,224,255,.12);border:1px solid rgba(48,224,255,.3);border-radius:10px;
+  font-family:'Tajawal',sans-serif;font-size:11px;font-weight:700;color:var(--teal);cursor:pointer;}
+.note-display{font-size:11px;color:rgba(48,224,255,.7);margin-top:6px;font-style:italic;}
+
+/* extra divider */
+.xdiv{display:flex;align-items:center;gap:8px;margin:10px 0;font-size:10px;font-weight:700;color:rgba(192,80,255,.5);letter-spacing:1.5px;text-transform:uppercase;}
+.xdiv::before,.xdiv::after{content:'';flex:1;height:1px;background:rgba(192,80,255,.2);}
+
+/* ── ACTION BUTTONS ── */
+.act-btns{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+.bn{width:100%;padding:15px;border:none;border-radius:17px;font-family:'Tajawal',sans-serif;font-size:15px;font-weight:900;cursor:pointer;
+  background:linear-gradient(135deg,var(--pur),var(--water));color:#fff;box-shadow:0 6px 26px rgba(192,80,255,.35);}
+.bwa{width:100%;padding:13px;border:none;border-radius:15px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;
+  background:linear-gradient(135deg,#075e54,#128c7e);color:#fff;}
+.bsnd{width:100%;padding:12px;border:1.5px solid rgba(192,80,255,.35);border-radius:14px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  background:rgba(192,80,255,.07);color:var(--pur2);}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(4,4,14,.94);border-top:1px solid var(--brd);
+  display:flex;z-index:20;padding-bottom:env(safe-area-inset-bottom,0px);backdrop-filter:blur(14px);}
+.nbt{flex:1;padding:11px 4px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:none;cursor:pointer;color:var(--muted);transition:color .2s;}
+.nbt.on{color:var(--pur2);}
+.nbi{font-size:21px;}
+.nbl{font-size:9px;font-weight:700;}
+
+/* ── SCROLL AREA ── */
+.gw{max-width:480px;margin:0 auto;padding:14px 14px 90px;}
+.gscr{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+
+/* ── LEADERBOARD ── */
+#slb{overflow:hidden;}
+.lb-hdr{padding:18px;font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;
+  text-align:center;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.lb-inner{max-width:480px;margin:0 auto;padding:16px 14px 90px;overflow-y:auto;}
+.top3{display:grid;grid-template-columns:1fr 1.08fr 1fr;gap:9px;margin-bottom:18px;}
+.t3c{border-radius:20px;padding:18px 12px;text-align:center;position:relative;overflow:hidden;transition:transform .2s;}
+.t3c:hover{transform:translateY(-2px);}
+.t3c.g1{background:linear-gradient(135deg,rgba(255,200,0,.14),rgba(255,120,0,.08));border:1.5px solid rgba(255,200,0,.35);transform:scale(1.04);}
+.t3c.g2{background:linear-gradient(135deg,rgba(180,180,200,.1),rgba(140,140,180,.06));border:1px solid rgba(180,180,200,.25);}
+.t3c.g3{background:linear-gradient(135deg,rgba(200,120,50,.1),rgba(170,90,30,.06));border:1px solid rgba(200,120,50,.25);}
+.t3-cr{font-size:26px;margin-bottom:6px;display:block;}
+.t3-nm{font-size:13px;font-weight:900;margin-bottom:4px;}
+.t3-pt{font-size:20px;font-weight:900;}
+.g1 .t3-pt{color:var(--rest);}
+.g2 .t3-pt{color:#bbb;}
+.g3 .t3-pt{color:#cd7f32;}
+.t3-sb{font-size:10px;color:var(--muted);margin-top:3px;}
+.lb-list{display:flex;flex-direction:column;gap:8px;}
+.lb-row{background:var(--c1);border:1px solid var(--brd);border-radius:15px;padding:13px 14px;
+  display:flex;align-items:center;gap:12px;transition:border-color .2s;}
+.lb-row.me{border-color:rgba(192,80,255,.45);background:rgba(192,80,255,.06);}
+.lb-rank{font-size:15px;font-weight:900;width:28px;text-align:center;flex-shrink:0;}
+.lb-name{flex:1;font-size:14px;font-weight:900;}
+.lb-pts{font-size:15px;font-weight:900;color:var(--rest);}
+.lb-str{font-size:11px;color:var(--food);font-weight:700;}
+.lb-refresh{display:block;text-align:center;font-size:12px;color:var(--muted);margin-top:12px;cursor:pointer;}
+
+/* ── STATS ── */
+#sst{overflow:hidden;}
+.st-hdr{padding:18px;font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;
+  text-align:center;border-bottom:1px solid var(--brd);flex-shrink:0;}
+.st-inner{max-width:480px;margin:0 auto;padding:16px 14px 90px;overflow-y:auto;}
+.st-sec{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.st-box{border-radius:16px;padding:16px;text-align:center;}
+.stb-v{font-size:28px;font-weight:900;display:block;}
+.stb-l{font-size:11px;color:var(--muted);margin-top:3px;display:block;}
+.cat-bars{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.cb-row{display:flex;align-items:center;gap:10px;}
+.cb-ico{font-size:18px;flex-shrink:0;width:26px;text-align:center;}
+.cb-name{font-size:12px;font-weight:700;width:60px;flex-shrink:0;}
+.cb-bar-wrap{flex:1;height:10px;background:rgba(255,255,255,.07);border-radius:10px;overflow:hidden;}
+.cb-fill{height:100%;border-radius:10px;transition:width .6s ease;}
+.cb-cnt{font-size:11px;font-weight:700;width:28px;text-align:left;flex-shrink:0;}
+.notif-card{background:var(--c1);border:1px solid var(--brd);border-radius:18px;padding:18px;margin-bottom:16px;}
+.notif-row{display:flex;align-items:center;gap:12px;}
+.notif-ico{font-size:28px;}
+.notif-info{flex:1;}
+.notif-t{font-size:14px;font-weight:900;margin-bottom:3px;}
+.notif-s{font-size:12px;color:var(--muted);}
+.notif-btn{padding:9px 18px;border:none;border-radius:11px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;
+  background:var(--grad);color:#fff;}
+.time-row{display:flex;gap:8px;margin-top:12px;align-items:center;}
+.time-inp{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:10px;
+  padding:9px 12px;font-family:'Tajawal',sans-serif;font-size:14px;color:var(--text);outline:none;direction:ltr;}
+.time-inp:focus{border-color:rgba(192,80,255,.4);}
+.time-save{padding:9px 16px;background:rgba(192,80,255,.15);border:1px solid rgba(192,80,255,.3);border-radius:10px;
+  font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;color:var(--pur2);cursor:pointer;}
+
+/* ── WIN ── */
+#sw2{align-items:center;justify-content:center;padding:30px 18px;
+  background:radial-gradient(ellipse at center,rgba(192,80,255,.14),transparent 70%);}
+.wi{max-width:400px;width:100%;text-align:center;}
+.wi-tr{font-size:72px;animation:bnc 1s ease-in-out infinite alternate;}
+@keyframes bnc{from{transform:translateY(0);}to{transform:translateY(-14px);}}
+.wi-t{font-family:'Cairo',sans-serif;font-size:34px;font-weight:900;margin:12px 0 4px;
+  background:linear-gradient(135deg,var(--rest),var(--food));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.wi-sub{font-size:13px;color:var(--muted);margin-bottom:18px;}
+.wi-score{background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.3);border-radius:18px;padding:18px;margin-bottom:14px;}
+.wi-pts{font-size:52px;font-weight:900;color:var(--rest);}
+.wi-ptsl{font-size:12px;color:var(--muted);margin-top:3px;}
+.wi-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.ws{background:var(--c1);border:1px solid var(--brd);border-radius:13px;padding:11px 8px;text-align:center;}
+.wsv{font-size:20px;font-weight:900;display:block;}
+.wsl{font-size:10px;color:var(--muted);}
+.wi-badges{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-bottom:18px;}
+.wi-bdg{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:50px;padding:5px 12px;font-size:11px;font-weight:700;}
+
+/* ── OVERLAYS ── */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);
+  backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
+.ov.open{display:flex;}
+.ovc{background:var(--c1);border:1px solid rgba(255,255,255,.1);border-radius:24px;
+  padding:26px 22px;max-width:360px;width:100%;text-align:center;margin:auto;}
+.ov-t{font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;margin-bottom:7px;}
+.ov-s{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.cpb{padding:16px;border-radius:16px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;color:#fff;transition:transform .2s;display:flex;flex-direction:column;align-items:center;gap:7px;}
+.cpb:hover{transform:scale(1.05);}
+.cpb span:first-child{font-size:26px;}
+.cpb-f{background:var(--foodg);}
+.cpb-w{background:var(--waterg);}
+.cpb-m{background:var(--moveg);}
+.cpb-r{background:var(--restg);color:#1a1a00;}
+
+/* weekly report */
+.wr-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+.wr-box{background:var(--c2);border-radius:12px;padding:13px;text-align:center;}
+.wr-v{font-size:22px;font-weight:900;display:block;}
+.wr-l{font-size:10px;color:var(--muted);}
+.wr-msg{font-size:14px;font-weight:700;line-height:1.7;color:var(--pur2);margin-top:4px;}
+
+/* ── TOAST ── */
+.tst{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);
+  border-radius:50px;padding:10px 22px;font-size:12px;font-weight:700;z-index:300;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+.tst.on{opacity:1;}
+.tst.ok{background:rgba(34,208,96,.18);border:1px solid rgba(34,208,96,.35);color:var(--move);}
+.tst.err{background:rgba(255,58,92,.18);border:1px solid rgba(255,58,92,.35);color:var(--food);}
+.tst.info{background:rgba(192,80,255,.18);border:1px solid rgba(192,80,255,.35);color:var(--pur2);}
+
+@media(max-width:390px){.top3{grid-template-columns:1fr;}.sr{gap:5px;}.dk-ico{font-size:36px;}}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="sh" class="scr on">
+<div class="hi">
+  <div class="h-logo">🃏</div>
+  <div class="h-title">أونو الصحة</div>
+  <div class="h-sub">٢٨ يوم × ٤ كروت يومياً = ١١٢ مهمة صحية 💪</div>
+  <div class="h-pills">
+    <div class="hp hp-f">🍽️ تغذية</div>
+    <div class="hp hp-w">💧 ماء</div>
+    <div class="hp hp-m">🏃‍♀️ حركة</div>
+    <div class="hp hp-r">🌙 راحة</div>
+    <div class="hp hp-s">✨ كروت خاصة</div>
+  </div>
+  <div class="fc">
+    <label class="fl">✨ اسمك</label>
+    <input class="fi" id="pName" type="text" placeholder="اكتبي اسمك..." maxlength="20">
+    <label class="fl" style="margin-top:4px">📧 إيميلك (اختياري)</label>
+    <input class="fi" id="pEmail" type="email" placeholder="example@gmail.com" style="direction:ltr;text-align:left;margin-bottom:0;">
+  </div>
+  <button class="bm" onclick="goStart()">🚀 ابدئي التحدي!</button>
+  <button class="br" onclick="restore()">☁️ استعادة بياناتي</button>
+  <div class="hn">💡 اسمك فقط مطلوب · الإيميل للاسترداد والحفظ السحابي</div>
+</div>
+</div>
+
+<!-- ONBOARDING -->
+<div id="sob" class="scr">
+<div class="ob-inner">
+  <div style="font-size:48px;margin-bottom:12px">🎯</div>
+  <div class="ob-title">ما هو هدفك الأساسي؟</div>
+  <div class="ob-sub">اختاري الأولوية اللي تبغي تطوريها — ستظهر مهامها أكثر في كروتك اليومية</div>
+  <div class="goal-grid">
+    <button class="goal-btn gb-f" id="gb-food" onclick="pickGoal('food',this)"><span>🍽️</span><span>أكل صحي</span></button>
+    <button class="goal-btn gb-w" id="gb-water" onclick="pickGoal('water',this)"><span>💧</span><span>شرب الماء</span></button>
+    <button class="goal-btn gb-m" id="gb-move" onclick="pickGoal('move',this)"><span>🏃‍♀️</span><span>حركة ورياضة</span></button>
+    <button class="goal-btn gb-r" id="gb-rest" onclick="pickGoal('rest',this)"><span>🌙</span><span>راحة وتأمل</span></button>
+  </div>
+  <div class="ob-note">يمكنك اختيار أكثر من هدف · الكروت ستكون متنوعة دائماً</div>
+  <button class="bm" onclick="finishOnboarding()">✨ يلا نبدأ!</button>
+</div>
+</div>
+
+<!-- GAME -->
+<div id="sg" class="scr">
+  <div class="ghdr">
+    <div class="glogo">🃏 أونو الصحة</div>
+    <div class="gday" id="gday">اليوم ١</div>
+  </div>
+  <div class="gscr">
+  <div class="gw">
+    <div class="sr">
+      <div class="sb"><span class="sv" id="spts" style="color:var(--rest)">٠</span><span class="sl">⭐ نقاط</span></div>
+      <div class="sb"><span class="sv" id="sstr" style="color:var(--food)">٠</span><span class="sl">🔥 Streak</span></div>
+      <div class="sb"><span class="sv" id="sdone" style="color:var(--move)">٠</span><span class="sl">✅ مهام</span></div>
+    </div>
+    <div class="cal-wrap">
+      <div class="cal-lbl">📅 تقويم ٢٨ يوم</div>
+      <div class="cal-g" id="calg"></div>
+    </div>
+    <div class="wc-bar" id="wcBar">
+      <div class="wc-ico">⭐</div>
+      <div><div class="wc-t" id="wcTitle">تحدي الأسبوع</div><div class="wc-s" id="wcSub"></div></div>
+    </div>
+    <div class="bonus" id="bonusBox">
+      <div class="bon-ico">🎉</div>
+      <div class="bon-t">أكملتِ الـ ٤ كروت!</div>
+      <div class="bon-s" id="bonSub">+٢٠ نقطة بونص 🌟</div>
+    </div>
+    <div class="deck-wrap">
+      <div class="deck-top">
+        <span class="dk-lbl">🃏 كروتك اليوم</span>
+        <div class="dk-bdg" id="dkBdg">٤/٤ متبقية</div>
+      </div>
+      <div class="deck-card" id="dkCard" onclick="drawCard()">
+        <div class="dk-ico">🎴</div>
+        <div class="dk-info">
+          <div class="dk-txt">اسحبي كرت</div>
+          <div class="dk-sub">اضغطي هنا</div>
+        </div>
+      </div>
+    </div>
+    <div class="drawn-list" id="drawnList"></div>
+    <div class="act-btns" id="actBtns" style="display:none">
+      <button class="bn" id="btnNext" onclick="nextDay()">📅 اليوم التالي ←</button>
+      <button class="bwa" onclick="shareWA()">💚 شاركي إنجازك واتساب</button>
+      <button class="bsnd" onclick="sendAdmin()">📲 أرسلي للإدارة</button>
+    </div>
+    <div id="sndOnly" style="display:none;margin-top:10px;">
+      <button class="bsnd" onclick="sendAdmin()">📲 أرسلي للإدارة</button>
+    </div>
+  </div>
+  </div>
+  <div class="bnav">
+    <button class="nbt on" id="n0" onclick="showTab('main')"><span class="nbi">🏠</span><span class="nbl">الرئيسية</span></button>
+    <button class="nbt" id="n1" onclick="showTab('lb')"><span class="nbi">🏆</span><span class="nbl">الترتيب</span></button>
+    <button class="nbt" id="n2" onclick="showTab('st')"><span class="nbi">📊</span><span class="nbl">إحصائياتي</span></button>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="slb" class="scr">
+  <div class="lb-hdr">🏆 لوحة الترتيب</div>
+  <div class="lb-inner">
+    <div class="top3" id="top3"></div>
+    <div class="lb-list" id="lbList"></div>
+    <span class="lb-refresh" onclick="loadLB()">🔄 تحديث</span>
+  </div>
+  <div class="bnav">
+    <button class="nbt" onclick="showTab('main')"><span class="nbi">🏠</span><span class="nbl">الرئيسية</span></button>
+    <button class="nbt on" onclick="showTab('lb')"><span class="nbi">🏆</span><span class="nbl">الترتيب</span></button>
+    <button class="nbt" onclick="showTab('st')"><span class="nbi">📊</span><span class="nbl">إحصائياتي</span></button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div id="sst" class="scr">
+  <div class="st-hdr">📊 إحصائياتي</div>
+  <div class="st-inner" id="stInner"></div>
+  <div class="bnav">
+    <button class="nbt" onclick="showTab('main')"><span class="nbi">🏠</span><span class="nbl">الرئيسية</span></button>
+    <button class="nbt" onclick="showTab('lb')"><span class="nbi">🏆</span><span class="nbl">الترتيب</span></button>
+    <button class="nbt on" onclick="showTab('st')"><span class="nbi">📊</span><span class="nbl">إحصائياتي</span></button>
+  </div>
+</div>
+
+<!-- WIN -->
+<div id="sw2" class="scr">
+<div class="wi">
+  <div class="wi-tr">🏆</div>
+  <div class="wi-t">مبروك! 🎉</div>
+  <div class="wi-sub" id="wiSub">أتممتِ تحدي الـ ٢٨ يوم كاملاً</div>
+  <div class="wi-score"><div class="wi-pts" id="wiPts">٠</div><div class="wi-ptsl">نقطة إجمالية 💫</div></div>
+  <div class="wi-stats">
+    <div class="ws"><span class="wsv" style="color:var(--pur2)">٢٨</span><span class="wsl">📅 يوم</span></div>
+    <div class="ws"><span class="wsv" id="wiTasks" style="color:var(--move)">٠</span><span class="wsl">✅ مهمة</span></div>
+    <div class="ws"><span class="wsv" id="wiStr" style="color:var(--food)">٠</span><span class="wsl">🔥 Streak</span></div>
+  </div>
+  <div class="wi-badges" id="wiBdgs"></div>
+  <button class="bwa" style="width:100%;margin-bottom:9px;" onclick="shareWA()">💚 شاركي إنجازك واتساب</button>
+  <button class="bsnd" style="width:100%;" onclick="sendAdmin()">📲 أرسلي للإدارة</button>
+</div>
+</div>
+
+<!-- WILD OVERLAY -->
+<div class="ov" id="ovWild">
+<div class="ovc">
+  <div class="ov-t">🌈 اختاري لونك!</div>
+  <p class="ov-s">كرت Wild — الخيار لكِ اليوم</p>
+  <div class="cgrid">
+    <button class="cpb cpb-f" onclick="pickWild('food')"><span>🍽️</span><span>تغذية</span></button>
+    <button class="cpb cpb-w" onclick="pickWild('water')"><span>💧</span><span>ماء</span></button>
+    <button class="cpb cpb-m" onclick="pickWild('move')"><span>🏃‍♀️</span><span>حركة</span></button>
+    <button class="cpb cpb-r" onclick="pickWild('rest')"><span>🌙</span><span>راحة</span></button>
+  </div>
+</div>
+</div>
+
+<!-- WEEKLY REPORT OVERLAY -->
+<div class="ov" id="ovWR">
+<div class="ovc">
+  <div style="font-size:40px;margin-bottom:10px">📊</div>
+  <div class="ov-t" id="wrTitle">تقرير الأسبوع 🌟</div>
+  <div class="wr-grid" id="wrGrid"></div>
+  <div class="wr-msg" id="wrMsg"></div>
+  <button class="bm" style="margin-top:16px;" onclick="closeOv('ovWR')">💪 واصلي!</button>
+</div>
+</div>
+
+<div class="tst" id="tst"></div>
+
+<script>
+// ══════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════
+const FC={apiKey:"AIzaSyCPa2-MXRWOZAp0O51PPLmKdVqsl-WZE-o",authDomain:"uno24-cd34c.firebaseapp.com",projectId:"uno24-cd34c",storageBucket:"uno24-cd34c.firebasestorage.app",messagingSenderId:"13768168936",appId:"1:13768168936:web:9bb59cbfbe1d5e47c4805d"};
+let db=null;
+try{firebase.initializeApp(FC);db=firebase.firestore();}catch(e){}
+
+// ══════════════════════════════════
+// TASKS
+// ══════════════════════════════════
+const CATS={food:{l:'🍽️ تغذية',c:'cbf',uc:'uc-f',ic:'🍽️'},water:{l:'💧 ماء',c:'cbw',uc:'uc-w',ic:'💧'},move:{l:'🏃‍♀️ حركة',c:'cbm',uc:'uc-m',ic:'🏃‍♀️'},rest:{l:'🌙 راحة',c:'cbr',uc:'uc-r',ic:'😴'}};
+const LV={easy:'سهلة',med:'متوسطة',hard:'صعبة'};
+const T={
+  food:[
+    {id:'f1',cat:'food',nm:'فطور صحي',dc:'كلي فطوراً صحياً — بيض، خضار، شوفان، أو جبنة مع خبز أسمر',lvl:'easy',pts:10,alt:'أي وجبة صباحية مغذية ولو صغيرة',aw:'حمل وكبار السن وأمراض المعدة'},
+    {id:'f2',cat:'food',nm:'بلا سكر في المشروبات',dc:'قهوتك وشايك بدون سكر مضاف اليوم',lvl:'easy',pts:20,alt:'قللي السكر للنص فقط',aw:'المبتدئات وضغط دم منخفض'},
+    {id:'f3',cat:'food',nm:'فاكهة بدل الحلويات',dc:'استبدلي رغبة الحلو اليوم بفاكهة طازجة',lvl:'easy',pts:30,alt:'فاكهة واحدة إضافية اليوم',aw:'سكري — اختاري فاكهة منخفضة السكر'},
+    {id:'f4',cat:'food',nm:'خضار في كل وجبة',dc:'أضيفي خضار — نيئة أو مطبوخة — لكل وجبة',lvl:'med',pts:40,alt:'خضار في وجبة واحدة فقط',aw:'مشاكل هضم وأسنان'},
+    {id:'f5',cat:'food',nm:'بروتين في كل وجبة',dc:'بيض أو دجاج أو لبن أو بقوليات في كل وجبة',lvl:'med',pts:50,alt:'بروتين في وجبة واحدة فقط',aw:'نباتيات والحمل'},
+    {id:'f6',cat:'food',nm:'بلا وجبات سريعة',dc:'يوم كامل بدون أي وجبة سريعة أو مقليات',lvl:'med',pts:60,alt:'وجبة سريعة واحدة فقط بدل العادة',aw:'أيام السفر والمشاوير'},
+    {id:'f7',cat:'food',nm:'وجبة صحية بيتية',dc:'حضّري وجبة صحية من الصفر بمكونات طازجة',lvl:'hard',pts:70,alt:'سلطة أو وجبة بيتية بسيطة',aw:'المشغولات وضيق الوقت'},
+    {id:'f8',cat:'food',nm:'بلا سكر مضاف كل اليوم',dc:'تجنبي كل ما فيه سكر مضاف طوال اليوم كاملاً',lvl:'hard',pts:80,alt:'قللي السكر بشكل ملحوظ',aw:'سكري وتحت إشراف تغذوي'},
+    {id:'f9',cat:'food',nm:'يوم غذائي مثالي',dc:'كل وجبات اليوم صحية ومتوازنة بروتين + خضار + نشا صحي',lvl:'hard',pts:90,alt:'وجبتان صحيتان من أصل ثلاث',aw:'أيام الضغط والمناسبات'},
+  ],
+  water:[
+    {id:'w1',cat:'water',nm:'كوب ماء فور الصحيان',dc:'قبل القهوة والجوال — كوب ماء أول شيء',lvl:'easy',pts:10,alt:'أي سائل دافئ بالصباح',aw:'غثيان صباحي للحوامل'},
+    {id:'w2',cat:'water',nm:'ماء قبل كل وجبة',dc:'كوب ماء مباشرة قبل الجلوس للأكل',lvl:'easy',pts:20,alt:'كوبان إضافيان في أي وقت',aw:'نسيان وضغط وقت'},
+    {id:'w3',cat:'water',nm:'ماء دافئ مع ليمون',dc:'كوب ماء دافئ مع نصف ليمونة صباحاً',lvl:'easy',pts:30,alt:'كوب ماء دافئ فقط',aw:'حموضة وقرحة معدة'},
+    {id:'w4',cat:'water',nm:'٤ أكواب ماء',dc:'٤ أكواب ماء موزعة على مراحل اليوم',lvl:'easy',pts:40,alt:'كوبان إضافيان عن عادتك',aw:'أمراض كلى — استشيري طبيبك'},
+    {id:'w5',cat:'water',nm:'بلا مشروبات غازية',dc:'يوم كامل بدون أي مشروب غازي',lvl:'med',pts:50,alt:'نصف كميتك المعتادة من الغازي',aw:'أيام الاحتفالات'},
+    {id:'w6',cat:'water',nm:'٦ أكواب + بلا سكريات',dc:'٦ أكواب ماء وبدون مشروبات سكرية',lvl:'med',pts:60,alt:'٤ أكواب ماء',aw:'مشغولات وضغط'},
+    {id:'w7',cat:'water',nm:'شاي أعشاب بدل القهوة',dc:'استبدلي قهوتك بشاي أعشاب — زنجبيل أو نعنع',lvl:'med',pts:70,alt:'كوب أعشاب واحد',aw:'إدمان كافيين وصداع'},
+    {id:'w8',cat:'water',nm:'٨ أكواب ماء',dc:'الكمية الموصى بها — ٨ أكواب كاملة',lvl:'hard',pts:80,alt:'٦ أكواب ماء',aw:'أمراض قلب وكلى'},
+    {id:'w9',cat:'water',nm:'٩ أكواب + عصير طبيعي',dc:'٩ أكواب ماء وعصير فواكه طازج بلا سكر',lvl:'hard',pts:90,alt:'٧ أكواب ماء',aw:'سكري — عصير ٢٠٠مل فقط'},
+  ],
+  move:[
+    {id:'m1',cat:'move',nm:'إطالة ١٠ دقائق',dc:'تمدد خفيف للعضلات ١٠ دقائق في أي وقت',lvl:'easy',pts:10,alt:'تنفس عميق ٥ دقائق',aw:'إصابات وحمل وسرير'},
+    {id:'m2',cat:'move',nm:'مشي ١٥ دقيقة',dc:'مشي خفيف في الغرفة أو الشارع ١٥ دقيقة',lvl:'easy',pts:20,alt:'مشي في الغرفة ١٠ دقائق',aw:'حمل وإصابة قدم'},
+    {id:'m3',cat:'move',nm:'١٠ قرفصاء',dc:'١٠ Squats بالسرعة المناسبة — الحائط يساعد',lvl:'easy',pts:30,alt:'١٠ رفع على الأصابع وقوفاً',aw:'ركبة وحمل وكبار السن'},
+    {id:'m4',cat:'move',nm:'مشي ٢٠ دقيقة',dc:'مشي متواصل ٢٠ دقيقة في أي مكان',lvl:'easy',pts:40,alt:'مشي ١٠ دقائق مرتين',aw:'تعب وحمل متأخر'},
+    {id:'m5',cat:'move',nm:'تمارين منزلية ٢٠ دقيقة',dc:'أي تمارين بيتية — pilates أو yoga أو cardio',lvl:'med',pts:50,alt:'يوغا أو إطالة ٢٠ دقيقة',aw:'مبتدئات وحمل وألم ظهر'},
+    {id:'m6',cat:'move',nm:'٣٠ دقيقة مشي أو رقص',dc:'نصف ساعة من أي نشاط تحبينه',lvl:'med',pts:60,alt:'٢٠ دقيقة مشي خفيف',aw:'دوالي وإصابات'},
+    {id:'m7',cat:'move',nm:'٦٠٠٠ خطوة',dc:'حققي ٦٠٠٠ خطوة مقاسة بتطبيق الجوال',lvl:'med',pts:70,alt:'٣٠٠٠ خطوة',aw:'حمل وإصابة وكبار السن'},
+    {id:'m8',cat:'move',nm:'تمارين مكثفة ٤٠ دقيقة',dc:'تمارين بشدة متوسطة لمدة ٤٠ دقيقة',lvl:'hard',pts:80,alt:'يوغا أو مشي متوسط ٣٠ دقيقة',aw:'أمراض قلب وحمل'},
+    {id:'m9',cat:'move',nm:'٨٠٠٠ خطوة',dc:'٨٠٠٠ خطوة — حوالي ٦ كيلومتر 🎉',lvl:'hard',pts:90,alt:'٤٠٠٠ خطوة + تمارين جلوس',aw:'إصابات وحمل ومشاكل بدنية'},
+  ],
+  rest:[
+    {id:'r1',cat:'rest',nm:'٣ أشياء ممتنة',dc:'اكتبي ٣ أشياء تشكرين عليها قبل النوم',lvl:'easy',pts:10,alt:'فكّري في شيء واحد ممتن',aw:'اكتئاب — هذه المهمة مفيدة جداً'},
+    {id:'r2',cat:'rest',nm:'استيقظي ٢٠ دقيقة مبكراً',dc:'ضعي المنبه ٢٠ دقيقة قبل وقتك المعتاد',lvl:'easy',pts:20,alt:'استيقظي ٥-١٠ دقائق مبكراً',aw:'أرق وطفل رضيع'},
+    {id:'r3',cat:'rest',nm:'١٥ دقيقة قراءة',dc:'اقرئي كتاباً أو مقالة بعيداً عن الجوال',lvl:'easy',pts:30,alt:'استمعي لبودكاست أو كتاب صوتي',aw:'مشاكل بصر ووقت ضيق'},
+    {id:'r4',cat:'rest',nm:'ساعة بلا شاشة',dc:'أغلقي الجوال والتلفاز ساعة قبل النوم',lvl:'med',pts:40,alt:'٣٠ دقيقة بلا شاشة',aw:'عمل ليلي وأم أطفال صغار'},
+    {id:'r5',cat:'rest',nm:'تأمل ١٠ دقائق',dc:'جلسة تأمل أو تنفس عميق ١٠ دقائق',lvl:'med',pts:50,alt:'٥ شهيقات عميقة ببطء',aw:'قلق ومبتدئات التأمل'},
+    {id:'r6',cat:'rest',nm:'نامي ٧ ساعات',dc:'خططي أن تنامي ٧ ساعات الليلة',lvl:'med',pts:60,alt:'قيلولة ٢٠ دقيقة + ليل أفضل',aw:'طفل رضيع وأرق مزمن'},
+    {id:'r7',cat:'rest',nm:'٤ ساعات بلا سوشيال',dc:'أوقفي السوشيال ٤ ساعات متواصلة',lvl:'med',pts:70,alt:'ساعتان بلا سوشيال',aw:'عمل يتطلب السوشيال'},
+    {id:'r8',cat:'rest',nm:'مساج ذاتي',dc:'خصصي ١٠ دقائق لمساج يديك وقدميك ورقبتك',lvl:'hard',pts:80,alt:'مساج يدين فقط ٥ دقائق',aw:'إصابات في الأطراف'},
+    {id:'r9',cat:'rest',nm:'يوم راحة ذهنية',dc:'يوم بعيد عن كل ما يضغطك — طبيعة وموسيقى',lvl:'hard',pts:90,alt:'٣٠ دقيقة لنفسك فقط',aw:'أمهات والتزامات كثيرة'},
+  ],
+};
+
+const BDGS=[
+  {id:'day3',ico:'🔥',l:'٣ أيام',f:s=>s.streak>=3},
+  {id:'day7',ico:'⚡',l:'أسبوع',f:s=>s.streak>=7},
+  {id:'pts100',ico:'💎',l:'١٠٠ نقطة',f:s=>s.pts>=100},
+  {id:'pts300',ico:'🌟',l:'٣٠٠ نقطة',f:s=>s.pts>=300},
+  {id:'pts500',ico:'👑',l:'٥٠٠ نقطة',f:s=>s.pts>=500},
+  {id:'pts1000',ico:'💫',l:'١٠٠٠ نقطة',f:s=>s.pts>=1000},
+  {id:'t20',ico:'✅',l:'٢٠ مهمة',f:s=>s.totalDone>=20},
+  {id:'t50',ico:'🌸',l:'٥٠ مهمة',f:s=>s.totalDone>=50},
+  {id:'t100',ico:'🎖️',l:'١٠٠ مهمة',f:s=>s.totalDone>=100},
+  {id:'full4',ico:'🎴',l:'يوم ٤/٤',f:s=>s.fullDays>=1},
+  {id:'full7',ico:'🎪',l:'٧ أيام كاملة',f:s=>s.fullDays>=7},
+  {id:'wild',ico:'🌈',l:'Wild!',f:s=>s.wildCount>=1},
+  {id:'skip',ico:'⛔',l:'استراحة',f:s=>s.skipCount>=1},
+  {id:'alt5',ico:'🌿',l:'البديل ٥×',f:s=>s.altCount>=5},
+  {id:'done28',ico:'🏆',l:'بطلة ٢٨ يوم',f:s=>s.day>28},
+];
+
+const LS='uno_v4';
+let S={};
+let chosenGoals=[];
+
+function defS(name,email){
+  return{name,email:email||'',day:1,pts:0,streak:0,totalDone:0,fullDays:0,
+    wildCount:0,skipCount:0,altCount:0,earnedBadges:[],dayLog:[],
+    goals:[],catStats:{food:0,water:0,move:0,rest:0},
+    today:{cards:[],bonus:false,pts:0},_lastAdv:'',notifTime:''};
+}
+const ar=n=>String(Math.round(n||0)).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+function sv(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}autoSend();}
+
+// ══════════════════════════════════
+// HOME → ONBOARDING
+// ══════════════════════════════════
+function goStart(){
+  const name=document.getElementById('pName').value.trim();
+  const email=document.getElementById('pEmail').value.trim().toLowerCase();
+  if(!name){toast('اكتبي اسمك أولاً 🌸','err');return;}
+  try{const d=localStorage.getItem(LS);if(d){const p=JSON.parse(d);if(p.name===name){S=p;go();return;}}}catch(e){}
+  S=defS(name,email);
+  showScr('sob');
+}
+
+function pickGoal(g,btn){
+  if(chosenGoals.includes(g)){chosenGoals=chosenGoals.filter(x=>x!==g);btn.classList.remove('picked');}
+  else{chosenGoals.push(g);btn.classList.add('picked');}
+}
+
+function finishOnboarding(){
+  S.goals=chosenGoals.length?chosenGoals:['food','water','move','rest'];
+  sv();go();
+}
+
+function go(){
+  showScr('sg');
+  loadWeeklyChallenge();
+  renderGame();
+  checkNotifTime();
+}
+
+async function restore(){
+  const email=document.getElementById('pEmail').value.trim().toLowerCase();
+  if(!email||!email.includes('@')){toast('أدخلي إيميلك للاسترداد 📧','err');return;}
+  if(!db){toast('Firebase غير متصل','err');return;}
+  toast('⏳ جاري الاسترداد...','info');
+  try{
+    const id=email.replace(/[.@+\s]/g,'_');
+    const doc=await db.collection('uno_players').doc(id).get();
+    if(!doc.exists){toast('ما وجدنا بياناتك ❌','err');return;}
+    S={...defS('',''),...doc.data()};
+    localStorage.setItem(LS,JSON.stringify(S));
+    toast(`✅ اليوم ${ar(S.day)} 🎉`,'info');
+    setTimeout(()=>{go();},1400);
+  }catch(e){toast('خطأ في الاسترداد','err');}
+}
+
+// ══════════════════════════════════
+// DRAW
+// ══════════════════════════════════
+const ALL=['food','water','move','rest'];
+const SP=['skip','reverse','plus2','wild'];
+
+function drawCard(){
+  if(!S.today)S.today={cards:[],bonus:false,pts:0};
+  const n=(S.today.cards||[]).length;
+  if(n>=4){toast('سحبتِ كل كروتك اليوم! 🎴','info');return;}
+
+  // Special card probability: 22%
+  if(Math.random()<0.22){handleSp(SP[Math.floor(Math.random()*SP.length)],n);return;}
+
+  // Category selection: boost goals
+  const used=(S.today.cards||[]).filter(c=>!c.isSp).map(c=>c.cat);
+  let pool=ALL.filter(c=>!used.includes(c));
+  if(!pool.length)pool=ALL;
+
+  // Goal boost: double the weight of priority cats
+  const goals=S.goals||[];
+  let weighted=[];
+  pool.forEach(c=>{weighted.push(c);if(goals.includes(c))weighted.push(c);});
+  const cat=weighted[Math.floor(Math.random()*weighted.length)];
+
+  const usedIds=(S.today.cards||[]).map(c=>c.id);
+  let tasks=T[cat].filter(t=>!usedIds.includes(t.id));
+  if(!tasks.length)tasks=T[cat];
+  const task=tasks[Math.floor(Math.random()*tasks.length)];
+  S.today.cards.push({...task,status:'pending',di:n});
+  sv();renderGame();
+  toast(`🎴 ${CATS[cat].ic} ${task.nm}`,'info');
+}
+
+// ══════════════════════════════════
+// SPECIAL CARDS
+// ══════════════════════════════════
+function handleSp(type,di){
+  if(type==='skip'){
+    S.today.cards.push({id:'sk'+di,cat:'special',nm:'يوم استراحة ⛔',dc:'كرت Skip — راحة كاملة! لا مهمة ولا خسارة نقاط 🎁',lvl:'sp',pts:50,alt:null,isSp:true,spT:'skip',status:'skip',earned:50,di});
+    S.pts+=50;S.today.pts=(S.today.pts||0)+50;S.skipCount=(S.skipCount||0)+1;
+    chkBdg();sv();renderGame();toast('⛔ Skip! +٥٠ نقطة مجانية','info');return;
+  }
+  if(type==='wild'){S._pwi=di;openOv('ovWild');return;}
+  if(type==='reverse'){
+    const prev=S.dayLog?.length?S.dayLog[S.dayLog.length-1]:null;
+    const pc=prev?.cards?prev.cards[Math.min(di,prev.cards.length-1)]:null;
+    if(pc&&pc.nm&&!pc.isSp){
+      const doubled=Math.floor((pc.earned||pc.pts||40)*2);
+      S.today.cards.push({...pc,id:'rv'+di,isSp:true,spT:'reverse',nm:'كرري: '+pc.nm+' 🔄',dc:pc.dc+'\n\n🔄 Reverse — أتمّيها بنقاط أمس مضاعفة!',pts:doubled,status:'pending',di});
+      sv();renderGame();toast('🔄 Reverse! نقاط مضاعفة','info');
+    }else{S._pwi=di;openOv('ovWild');}
+    return;
+  }
+  if(type==='plus2'){
+    const getRand=(ex=[])=>{
+      const uc=(S.today.cards||[]).filter(c=>!c.isSp).map(c=>c.cat);
+      let p=ALL.filter(c=>![...uc,...ex].includes(c));if(!p.length)p=ALL;
+      const c=p[Math.floor(Math.random()*p.length)];
+      const ui=(S.today.cards||[]).map(c=>c.id);
+      let t=T[c].filter(x=>!ui.includes(x.id));if(!t.length)t=T[c];
+      return t[Math.floor(Math.random()*t.length)];
+    };
+    const t1=getRand();const t2=getRand([t1.cat]);
+    S.today.cards.push({id:'p2'+di,cat:'special',nm:'تحدي مزدوج ➕',dc:'مهمتان في هذا الكرت! أتمّيهما معاً للنقاط المضاعفة 💪',isSp:true,spT:'plus2',pts:0,alt:null,
+      ex1:{...t1,status:'pending'},ex2:{...t2,status:'pending'},status:'pending',di});
+    sv();renderGame();toast('➕ تحدي مزدوج! مهمتان 💪','info');return;
+  }
+}
+
+function pickWild(cat){
+  closeOv('ovWild');const di=S._pwi||0;delete S._pwi;
+  const ui=(S.today.cards||[]).map(c=>c.id);
+  let tasks=T[cat].filter(t=>!ui.includes(t.id));if(!tasks.length)tasks=T[cat];
+  const task=tasks[Math.floor(Math.random()*tasks.length)];
+  S.today.cards.push({...task,id:'wd'+di,isSp:true,spT:'wild',nm:'🌈 Wild: '+task.nm,pts:task.pts+75,status:'pending',di});
+  S.wildCount=(S.wildCount||0)+1;chkBdg();sv();renderGame();
+  toast(`🌈 Wild → ${CATS[cat].ic} ${task.nm}`,'info');
+}
+
+// ══════════════════════════════════
+// RESOLVE
+// ══════════════════════════════════
+function resolve(i,choice,sk){
+  const card=S.today.cards[i];if(!card)return;
+  if(card.spT==='plus2'&&sk){
+    const sub=card[sk];if(!sub||sub.status!=='pending')return;
+    let earned=0;
+    if(choice==='done'){sub.status='done';earned=sub.pts;S.totalDone++;S.catStats[sub.cat]=(S.catStats[sub.cat]||0)+1;}
+    else if(choice==='alt'){sub.status='alt';earned=Math.floor(sub.pts*.7);S.totalDone++;S.altCount++;S.catStats[sub.cat]=(S.catStats[sub.cat]||0)+1;}
+    else sub.status='skip';
+    sub.earned=earned;S.pts+=earned;S.today.pts+=earned;
+    const both=card.ex1?.status!=='pending'&&card.ex2?.status!=='pending';
+    if(both){
+      const bf=(card.ex1?.status==='done'||card.ex1?.status==='alt')&&(card.ex2?.status==='done'||card.ex2?.status==='alt');
+      if(bf){const b=(card.ex1?.earned||0)+(card.ex2?.earned||0);S.pts+=b;S.today.pts+=b;card.bonusG=true;}
+      card.status='done';
+    }
+    chkBdg();sv();renderGame();if(earned>0)toast(`⭐ +${ar(earned)} نقطة`);return;
+  }
+  if(card.status!=='pending')return;
+  let earned=0;
+  if(choice==='done'){card.status='done';earned=card.pts;S.totalDone++;if(card.cat&&card.cat!=='special')S.catStats[card.cat]=(S.catStats[card.cat]||0)+1;}
+  else if(choice==='alt'){card.status='alt';earned=Math.floor(card.pts*.7);S.totalDone++;S.altCount++;if(card.cat&&card.cat!=='special')S.catStats[card.cat]=(S.catStats[card.cat]||0)+1;}
+  else card.status='skip';
+  card.earned=earned;S.pts+=earned;S.today.pts+=earned;
+  // Bonus check
+  const cards=S.today.cards||[];
+  const allR=cards.every(c=>c.status!=='pending'&&!(c.spT==='plus2'&&(c.ex1?.status==='pending'||c.ex2?.status==='pending')));
+  const doneN=cards.filter(c=>c.status==='done'||c.status==='alt').length;
+  if(cards.length>=4&&allR&&doneN>=4&&!S.today.bonus){
+    S.today.bonus=true;S.pts+=20;S.today.pts+=20;S.fullDays++;
+    document.getElementById('bonusBox').classList.add('show');
+    document.getElementById('bonSub').textContent='+٢٠ نقطة يوم مثالي 🌟';
+    setTimeout(()=>document.getElementById('bonusBox').classList.remove('show'),5000);
+  }
+  chkBdg();sv();renderGame();
+  if(earned>0)toast(`⭐ +${ar(earned)} نقطة`);
+}
+
+function saveNote(i){
+  const inp=document.getElementById(`ni${i}`);if(!inp)return;
+  const note=inp.value.trim();if(!note)return;
+  if(S.today.cards[i])S.today.cards[i].note=note;
+  sv();renderGame();toast('✅ تم حفظ ملاحظتك');
+}
+
+// ══════════════════════════════════
+// NEXT DAY
+// ══════════════════════════════════
+function nextDay(){
+  const n=(S.today?.cards||[]).length;
+  if(n<4&&!confirm('لم تسحبي كل الكروت الـ٤!\nهل تريدين الانتقال لليوم التالي؟'))return;
+  if(!confirm(`⚠️ الانتقال لليوم ${ar((S.day||1)+1)}؟\nلا يمكن التراجع!`))return;
+  const today=new Date().toDateString();
+  const yesterday=new Date(Date.now()-864e5).toDateString();
+  if(S._lastAdv===yesterday||!S._lastAdv)S.streak++;
+  else if(S._lastAdv!==today)S.streak=1;
+  S._lastAdv=today;
+  const dc=(S.today?.cards||[]).filter(c=>c.status==='done'||c.status==='alt').length;
+  S.dayLog.push({day:S.day,pts:S.today?.pts||0,done:dc,cards:JSON.parse(JSON.stringify(S.today?.cards||[]))});
+  S.day++;
+  // Weekly report every 7 days
+  if(S.day>1&&(S.day-1)%7===0)showWeeklyReport();
+  if(S.day>28){sv();showWin();return;}
+  S.today={cards:[],bonus:false,pts:0};
+  chkBdg();sv();renderGame();
+  toast(`🌟 اليوم ${ar(S.day)} — صباح الخير ☀️`,'info');
+}
+
+// ══════════════════════════════════
+// RENDER MAIN
+// ══════════════════════════════════
+function renderGame(){
+  document.getElementById('gday').textContent=`اليوم ${ar(S.day||1)}`;
+  document.getElementById('spts').textContent=ar(S.pts||0);
+  document.getElementById('sstr').textContent=ar(S.streak||0);
+  document.getElementById('sdone').textContent=ar(S.totalDone||0);
+  // Cal
+  const cg=document.getElementById('calg');cg.innerHTML='';
+  for(let d=1;d<=28;d++){
+    const el=document.createElement('div');
+    const log=S.dayLog?.find(l=>l.day===d);
+    const isCur=d===(S.day||1);
+    el.className='cd '+(log?(log.done>0?'dn':'sk'):isCur?'cur':'ft');
+    el.textContent=ar(d);cg.appendChild(el);
+  }
+  // Deck
+  const drawn=(S.today?.cards||[]).length;
+  const dk=document.getElementById('dkCard');
+  document.getElementById('dkBdg').textContent=`${ar(4-drawn)}/٤ متبقية`;
+  if(drawn>=4){dk.classList.add('dis');dk.querySelector('.dk-txt').textContent='انتهت الكروت';}
+  else{dk.classList.remove('dis');dk.querySelector('.dk-txt').textContent='اسحبي كرت';}
+  // Cards
+  const dl=document.getElementById('drawnList');dl.innerHTML='';
+  (S.today?.cards||[]).forEach((c,i)=>dl.appendChild(buildCard(c,i)));
+  // Actions
+  const allR=(S.today?.cards||[]).length>=4&&(S.today?.cards||[]).every(c=>c.status!=='pending'&&!(c.spT==='plus2'&&(c.ex1?.status==='pending'||c.ex2?.status==='pending')));
+  document.getElementById('actBtns').style.display=allR?'flex':'none';
+  document.getElementById('sndOnly').style.display=!allR&&drawn>0?'block':'none';
+  if(allR)document.getElementById('btnNext').textContent=S.day>=28?'🏆 أنهي التحدي!':'📅 اليوم التالي ←';
+}
+
+function buildCard(card,i){
+  const wrap=document.createElement('div');
+  const cat=card.cat&&card.cat!=='special'?card.cat:null;
+  const ci=cat?CATS[cat]:null;
+  const sc=['uc-f','uc-w','uc-m','uc-r','uc-s'];
+  const stripes=['tc-stripe-f','tc-stripe-w','tc-stripe-m','tc-stripe-r','tc-stripe-s'];
+  const catIdx={'food':0,'water':1,'move':2,'rest':3,'special':4};
+  const idx=catIdx[card.cat]||4;
+  const isDone=card.status==='done'||card.status==='alt';
+  const isSkip=card.status==='skip'||card.spT==='skip';
+  const stCls=isDone?'done-c':isSkip?'skip-c':card.status==='no'?'no-c':'';
+  wrap.className=`tc ${stCls}`;
+  // Mini card
+  const lvlN={easy:1,med:5,hard:9}[card.lvl]||'✨';
+  let mini;
+  if(['skip','reverse','plus2','wild'].includes(card.spT)){
+    const spi={skip:'⛔',reverse:'🔄',plus2:'➕',wild:'🌈'}[card.spT];
+    const spt={skip:'Skip',reverse:'Rev',plus2:'+2',wild:'Wild'}[card.spT];
+    mini=`<div class="ucard uc-s"><div class="uc-oval"></div><div class="uc-sp">${spi}</div><div class="uc-st">${spt}</div></div>`;
+  } else {
+    mini=`<div class="ucard ${sc[idx]}"><div class="uc-oval"></div><div class="uc-n">${lvlN}</div><div class="uc-i">${ci?ci.ic:'✨'}</div></div>`;
+  }
+  // Content
+  let body='';
+  if(card.spT==='plus2'){body=buildPlus2(card,i);}
+  else if(card.status==='pending'){body=buildPending(card,i);}
+  else{
+    const rCls={done:'rb-ok',alt:'rb-alt',skip:'rb-sk'}[card.status]||'rb-sk';
+    const rTxt={done:'✅ أنجزتِها',alt:'💡 البديل',skip:'⛔ راحة',no:'❌ تخطيتِها'}[card.status]||'';
+    const noteDisp=card.note?`<div class="note-display">📝 "${card.note}"</div>`:'';
+    body=`<div class="res-bdg ${rCls}">${rTxt}${card.earned?` · +${ar(card.earned)} نقطة`:''}</div>${noteDisp}`;
+  }
+  wrap.innerHTML=`
+    <div class="tc-stripe ${stripes[idx]}"></div>
+    <div class="tc-inner">
+      <div class="tc-head">
+        ${mini}
+        <div class="tc-body">
+          <div class="tc-top">
+            <div class="cat-bdg ${ci?ci.c:'cbs'}">${ci?ci.l:'✨ كرت خاص'}</div>
+            ${card.lvl&&card.lvl!=='sp'?`<div class="lvl-t">${LV[card.lvl]||''}</div>`:''}
+            <div class="pts-bdg">⭐ ${ar(card.spT==='plus2'?((card.ex1?.pts||0)+(card.ex2?.pts||0)):card.pts)}</div>
+          </div>
+          <div class="tc-nm">${card.nm||'—'}</div>
+          <div class="tc-dc">${card.dc||''}</div>
+        </div>
+      </div>
+      ${body}
+    </div>`;
+  return wrap;
+}
+
+function buildPending(card,i){
+  const ab=card.alt?`<span class="alt-btn" onclick="tgAlt(${i})">💡 بديل أسهل</span>
+    <div class="alt-box" id="ab${i}"><div class="alt-ttl">🌿 البديل — نفس النقاط:</div><div class="alt-tx">${card.alt}</div>${card.aw?`<div class="alt-cases">مناسب: ${card.aw}</div>`:''}</div>`:'';
+  return`${ab}
+    <div class="tc-btns">
+      <button class="tbtn tb-ok" onclick="resolve(${i},'done')">✅ أكملتِها!</button>
+      ${card.alt?`<button class="tbtn tb-alt" onclick="resolve(${i},'alt')">💡 البديل (+${ar(Math.floor(card.pts*.7))})</button>`:''}
+      <button class="tbtn tb-skip" onclick="resolve(${i},'skip')">❌ تخطي</button>
+    </div>
+    <div class="note-row">
+      <input class="note-inp-sm" id="ni${i}" placeholder="أضيفي ملاحظة أو إثبات...">
+      <button class="note-save" onclick="saveNote(${i})">💾</button>
+    </div>`;
+}
+
+function buildPlus2(card,i){
+  function sub(s,sk,ci){
+    if(!s)return'';
+    if(s.status==='pending'){
+      const ab=s.alt?`<span class="alt-btn" onclick="tgAlt('${i}_${sk}')">💡 بديل</span>
+        <div class="alt-box" id="ab${i}_${sk}"><div class="alt-ttl">🌿 البديل:</div><div class="alt-tx">${s.alt}</div></div>`:'';
+      return`<div style="background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:13px;padding:12px;">
+        <div class="tc-top" style="margin-bottom:6px;"><div class="cat-bdg ${ci?ci.c:'cbs'}">${ci?ci.l:''}</div><div class="pts-bdg">⭐ ${ar(s.pts)}</div></div>
+        <div class="tc-nm" style="font-size:14px;">${s.nm||''}</div>
+        <div class="tc-dc" style="font-size:11px;">${s.dc||''}</div>
+        ${ab}
+        <div class="tc-btns" style="margin-top:9px;">
+          <button class="tbtn tb-ok" onclick="resolve(${i},'done','${sk}')">✅ أكملتِها!</button>
+          ${s.alt?`<button class="tbtn tb-alt" onclick="resolve(${i},'alt','${sk}')">💡 البديل (+${ar(Math.floor(s.pts*.7))})</button>`:''}
+          <button class="tbtn tb-skip" onclick="resolve(${i},'skip','${sk}')">❌ تخطي</button>
+        </div>
+      </div>`;
+    }
+    const rTxt={done:'✅ أنجزتِها',alt:'💡 البديل',skip:'❌ تخطي'}[s.status]||'';
+    return`<div style="background:rgba(34,208,96,.04);border:1px solid rgba(34,208,96,.2);border-radius:13px;padding:12px;">
+      <div class="tc-nm" style="font-size:14px;">${s.nm||''}</div>
+      <div class="res-bdg rb-ok" style="margin-top:7px;">${rTxt} · +${ar(s.earned||0)} نقطة</div>
+    </div>`;
+  }
+  const c1=card.ex1?.cat?CATS[card.ex1.cat]:null;
+  const c2=card.ex2?.cat?CATS[card.ex2.cat]:null;
+  return`<div style="display:flex;flex-direction:column;gap:9px;">
+    ${sub(card.ex1,'ex1',c1)}
+    <div class="xdiv">المهمة الإضافية</div>
+    ${sub(card.ex2,'ex2',c2)}
+    ${card.bonusG?'<div class="res-bdg rb-ok" style="justify-content:center;">🎉 بونص! أكملتِ الاثنتين ×٢</div>':''}
+  </div>`;
+}
+function tgAlt(id){const el=document.getElementById(`ab${id}`);if(el)el.classList.toggle('open');}
+
+// ══════════════════════════════════
+// TABS
+// ══════════════════════════════════
+function showTab(t){
+  const m={main:'sg',lb:'slb',st:'sst'};
+  Object.entries(m).forEach(([k,id])=>{
+    document.getElementById(id).style.display=k===t?'flex':'none';
+  });
+  ['n0','n1','n2'].forEach((id,i)=>{
+    const tabs=['main','lb','st'];
+    document.getElementById(id).classList.toggle('on',tabs[i]===t);
+  });
+  if(t==='lb')loadLB();
+  if(t==='st')renderStats();
+}
+
+// ══════════════════════════════════
+// LEADERBOARD
+// ══════════════════════════════════
+async function loadLB(){
+  if(!db){document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Firebase غير متصل</div>';return;}
+  try{
+    const snap=await db.collection('uno_players').orderBy('pts','desc').limit(20).get();
+    const players=snap.docs.map(d=>d.data());
+    const top3=players.slice(0,3);
+    const rest=players.slice(3);
+    const order=[top3[1],top3[0],top3[2]];
+    const rc=['g2','g1','g3'];const cr=['🥈','🥇','🥉'];
+    document.getElementById('top3').innerHTML=order.map((p,i)=>{
+      if(!p)return`<div class="t3c ${rc[i]}"><span class="t3-cr">${cr[i]}</span><div style="opacity:.3;font-size:18px;margin:8px 0">—</div></div>`;
+      return`<div class="t3c ${rc[i]}"><span class="t3-cr">${cr[i]}</span><div class="t3-nm">${p.name||'—'}</div><div class="t3-pt">${ar(p.pts||0)}</div><div class="t3-sb">يوم ${ar(p.day||0)} · 🔥${ar(p.streak||0)}</div></div>`;
+    }).join('');
+    const myId=(S.email||S.name).replace(/[.@+\s]/g,'_');
+    document.getElementById('lbList').innerHTML=players.map((p,i)=>{
+      const pid=(p.email||p.name||'').replace(/[.@+\s]/g,'_');
+      const isMe=pid===myId||p.name===S.name;
+      const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':ar(i+1);
+      return`<div class="lb-row ${isMe?'me':''}">
+        <div class="lb-rank">${rank}</div>
+        <div class="lb-name">${p.name||'—'} ${isMe?'<span style="font-size:10px;color:var(--pur2);">· أنتِ</span>':''}</div>
+        <div>
+          <div class="lb-pts">${ar(p.pts||0)}</div>
+          <div class="lb-str">🔥${ar(p.streak||0)}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){document.getElementById('lbList').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);">خطأ في التحميل</div>';}
+}
+
+// ══════════════════════════════════
+// STATS
+// ══════════════════════════════════
+function renderStats(){
+  const el=document.getElementById('stInner');
+  const cs=S.catStats||{food:0,water:0,move:0,rest:0};
+  const total=Object.values(cs).reduce((a,b)=>a+b,0)||1;
+  const cats=[
+    {k:'food',nm:'تغذية',ic:'🍽️',col:'var(--food)'},
+    {k:'water',nm:'ماء',ic:'💧',col:'var(--water)'},
+    {k:'move',nm:'حركة',ic:'🏃‍♀️',col:'var(--move)'},
+    {k:'rest',nm:'راحة',ic:'😴',col:'var(--rest)'},
+  ];
+  const rate=S.dayLog?.length?Math.round(S.dayLog.filter(d=>d.done>0).length/S.dayLog.length*100):0;
+  el.innerHTML=`
+    <div class="st-sec">الأرقام الكلية</div>
+    <div class="st-grid" style="margin-bottom:16px;">
+      <div class="st-box" style="background:rgba(255,200,0,.1);border:1px solid rgba(255,200,0,.2)"><span class="stb-v" style="color:var(--rest)">${ar(S.pts||0)}</span><span class="stb-l">⭐ إجمالي النقاط</span></div>
+      <div class="st-box" style="background:rgba(255,58,92,.1);border:1px solid rgba(255,58,92,.2)"><span class="stb-v" style="color:var(--food)">🔥${ar(S.streak||0)}</span><span class="stb-l">Streak الحالي</span></div>
+      <div class="st-box" style="background:rgba(34,208,96,.1);border:1px solid rgba(34,208,96,.2)"><span class="stb-v" style="color:var(--move)">${ar(S.totalDone||0)}</span><span class="stb-l">✅ مهام منجزة</span></div>
+      <div class="st-box" style="background:rgba(192,80,255,.1);border:1px solid rgba(192,80,255,.2)"><span class="stb-v" style="color:var(--pur2)">${ar(rate)}٪</span><span class="stb-l">📅 معدل الالتزام</span></div>
+    </div>
+    <div class="st-sec">توزيع المهام بالفئات</div>
+    <div class="cat-bars">
+      ${cats.map(c=>`<div class="cb-row">
+        <span class="cb-ico">${c.ic}</span>
+        <span class="cb-name">${c.nm}</span>
+        <div class="cb-bar-wrap"><div class="cb-fill" style="width:${Math.round((cs[c.k]||0)/total*100)}%;background:${c.col};"></div></div>
+        <span class="cb-cnt" style="color:${c.col}">${ar(cs[c.k]||0)}</span>
+      </div>`).join('')}
+    </div>
+    <div class="st-sec">الشارات المكتسبة (${ar(S.earnedBadges?.length||0)}/${ar(BDGS.length)})</div>
+    <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;">
+      ${BDGS.map(b=>{const e=S.earnedBadges?.includes(b.id);return`<div style="background:${e?'rgba(192,80,255,.14)':'rgba(255,255,255,.04)'};border:1px solid ${e?'rgba(192,80,255,.35)':'rgba(255,255,255,.07)'};border-radius:50px;padding:5px 11px;font-size:11px;font-weight:700;opacity:${e?1:.35}">${b.ico} ${b.l}</div>`;}).join('')}
+    </div>
+    <div class="notif-card">
+      <div class="notif-row">
+        <div class="notif-ico">🔔</div>
+        <div class="notif-info">
+          <div class="notif-t">تذكير يومي</div>
+          <div class="notif-s" id="notifSt">غير مفعّل</div>
+        </div>
+        <button class="notif-btn" onclick="reqNotif()">تفعيل</button>
+      </div>
+      <div class="time-row">
+        <input class="time-inp" type="time" id="notifTime" value="${S.notifTime||'09:00'}">
+        <button class="time-save" onclick="saveNotifTime()">💾 حفظ الوقت</button>
+      </div>
+    </div>`;
+  checkNotifStatus();
+}
+
+// ══════════════════════════════════
+// WEEKLY CHALLENGE (from Firebase)
+// ══════════════════════════════════
+async function loadWeeklyChallenge(){
+  if(!db)return;
+  try{
+    const doc=await db.collection('app_settings').doc('weekly_challenge').get();
+    if(!doc.exists)return;
+    const d=doc.data();
+    if(d&&d.title&&d.active){
+      document.getElementById('wcBar').classList.add('show');
+      document.getElementById('wcTitle').textContent='⭐ '+d.title;
+      document.getElementById('wcSub').textContent=d.desc||'';
+    }
+  }catch(e){}
+}
+
+// ══════════════════════════════════
+// WEEKLY REPORT
+// ══════════════════════════════════
+function showWeeklyReport(){
+  const week=S.dayLog?.slice(-7)||[];
+  const wpts=week.reduce((t,d)=>t+(d.pts||0),0);
+  const wdone=week.reduce((t,d)=>t+(d.done||0),0);
+  const wdays=week.filter(d=>d.done>0).length;
+  const msgs=['رائعة! استمري على هذا المستوى 💪','أسبوع ممتاز — كوني فخورة بنفسك 🌟','كل يوم خطوة للأمام — أنتِ تقدمين 🌸','الاستمرارية هي السر — أنتِ تثبتين ذلك 🔥'];
+  const msg=msgs[Math.floor(Math.random()*msgs.length)];
+  document.getElementById('wrGrid').innerHTML=`
+    <div class="wr-box"><span class="wr-v" style="color:var(--rest)">${ar(wpts)}</span><span class="wr-l">نقاط الأسبوع</span></div>
+    <div class="wr-box"><span class="wr-v" style="color:var(--move)">${ar(wdone)}</span><span class="wr-l">مهام مكتملة</span></div>
+    <div class="wr-box"><span class="wr-v" style="color:var(--pur2)">${ar(wdays)}/٧</span><span class="wr-l">أيام ملتزمة</span></div>
+    <div class="wr-box"><span class="wr-v" style="color:var(--food)">🔥${ar(S.streak||0)}</span><span class="wr-l">Streak</span></div>`;
+  document.getElementById('wrTitle').textContent=`تقرير الأسبوع ${ar(Math.ceil((S.day-1)/7))} 🌟`;
+  document.getElementById('wrMsg').textContent=msg;
+  openOv('ovWR');
+}
+
+// ══════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════
+async function reqNotif(){
+  if(!('Notification' in window)){toast('المتصفح لا يدعم الإشعارات','err');return;}
+  const perm=await Notification.requestPermission();
+  if(perm==='granted'){toast('✅ تم تفعيل التذكير!');checkNotifStatus();}
+  else toast('لم يتم السماح بالإشعارات','err');
+}
+function saveNotifTime(){
+  const t=document.getElementById('notifTime').value;
+  if(!t)return;S.notifTime=t;sv();toast('✅ تم حفظ وقت التذكير — '+t);checkNotifStatus();
+}
+function checkNotifStatus(){
+  const el=document.getElementById('notifSt');if(!el)return;
+  const granted=typeof Notification!=='undefined'&&Notification.permission==='granted';
+  el.textContent=granted?(S.notifTime?`مفعّل — كل يوم ${S.notifTime}`:'مفعّل — حددي الوقت'):'غير مفعّل';
+}
+function checkNotifTime(){
+  if(typeof Notification==='undefined'||Notification.permission!=='granted'||!S.notifTime)return;
+  const [h,m]=S.notifTime.split(':').map(Number);
+  const now=new Date();const target=new Date();
+  target.setHours(h,m,0,0);
+  if(target<=now)target.setDate(target.getDate()+1);
+  const ms=target-now;
+  setTimeout(()=>{new Notification('🃏 أونو الصحة',{body:`يوم ${ar(S.day||1)} — اسحبي كروتك اليومية!`,icon:'🃏'});},ms);
+}
+
+// ══════════════════════════════════
+// WHATSAPP SHARE
+// ══════════════════════════════════
+function shareWA(){
+  const n=(S.today?.cards||[]).filter(c=>c.status==='done'||c.status==='alt').length;
+  const txt=`🃏 أونو الصحة\n👤 ${S.name} — اليوم ${ar(S.day||1)}\n\n✅ أكملتِ ${ar(n)}/٤ مهام اليوم\n⭐ ${ar(S.pts||0)} نقطة إجمالية\n🔥 ${ar(S.streak||0)} يوم Streak\n\n#أونو_الصحة 💪`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+
+// ══════════════════════════════════
+// FIREBASE SEND
+// ══════════════════════════════════
+async function sendAdmin(){
+  if(!S.name){toast('لا توجد بيانات','err');return;}
+  if(!db){toast('Firebase غير متصل','err');return;}
+  const id=(S.email||S.name).replace(/[.@+\s]/g,'_');
+  try{
+    await db.collection('uno_players').doc(id).set({
+      id,name:S.name,email:S.email||'',
+      day:S.day,pts:S.pts,streak:S.streak,totalDone:S.totalDone,fullDays:S.fullDays,
+      earnedBadges:S.earnedBadges||[],
+      dayLog:(S.dayLog||[]).map(d=>({day:d.day,pts:d.pts,done:d.done})),
+      catStats:S.catStats||{},wildCount:S.wildCount||0,skipCount:S.skipCount||0,altCount:S.altCount||0,
+      goals:S.goals||[],lastSeen:firebase.firestore.FieldValue.serverTimestamp(),
+    },{merge:true});
+    toast('✅ تم الإرسال للإدارة!');
+  }catch(e){toast('خطأ في الإرسال','err');}
+}
+let _at=null;function autoSend(){clearTimeout(_at);_at=setTimeout(sendAdmin,2500);}
+
+// ══════════════════════════════════
+// WIN
+// ══════════════════════════════════
+function showWin(){
+  document.getElementById('wiPts').textContent=ar(S.pts||0);
+  document.getElementById('wiSub').textContent=`مبروك ${S.name}! أتممتِ تحدي الـ ٢٨ يوم 🦋`;
+  document.getElementById('wiTasks').textContent=ar(S.totalDone||0);
+  document.getElementById('wiStr').textContent=ar(S.streak||0);
+  document.getElementById('wiBdgs').innerHTML=(S.earnedBadges||[]).map(id=>{const b=BDGS.find(x=>x.id===id);return b?`<div class="wi-bdg">${b.ico} ${b.l}</div>`:''}).join('');
+  showScr('sw2');sendAdmin();
+}
+
+// ══════════════════════════════════
+// BADGES
+// ══════════════════════════════════
+function chkBdg(){
+  if(!S.earnedBadges)S.earnedBadges=[];
+  BDGS.forEach(b=>{if(!S.earnedBadges.includes(b.id)&&b.f(S)){S.earnedBadges.push(b.id);setTimeout(()=>toast(`🏅 شارة: ${b.l}!`,'info'),400);}});
+}
+
+// ══════════════════════════════════
+// UTILS
+// ══════════════════════════════════
+function showScr(id){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function openOv(id){document.getElementById(id).classList.add('open');}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+// Close overlays on backdrop click
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+let _tt=null;
+function toast(msg,type='ok'){
+  const t=document.getElementById('tst');t.textContent=msg;t.className=`tst on ${type}`;
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),2800);
+}
+
+// Handle back button for screens within game
+document.getElementById('sg').style.display='none';
+document.getElementById('slb').style.display='none';
+document.getElementById('sst').style.display='none';
+
+// INIT
+window.onload=()=>{
+  try{const d=localStorage.getItem(LS);if(d){const p=JSON.parse(d);if(p.name){document.getElementById('pName').value=p.name;if(p.email)document.getElementById('pEmail').value=p.email;}}}catch(e){}
+  document.getElementById('pName').addEventListener('keydown',e=>{if(e.key==='Enter')goStart();});
+  // Fix: ensure screens show correctly
+  document.getElementById('sg').style.display='';
+  document.getElementById('slb').style.display='';
+  document.getElementById('sst').style.display='';
+};
+</script>
+</body>
+</html>

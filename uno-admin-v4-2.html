@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📊 أونو الصحة — الإدارة v4</title>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#04040e;--c1:#080818;--c2:#0e0e24;--brd:rgba(255,255,255,.07);--text:#f0eeff;--muted:rgba(240,238,255,.44);
+  --food:#ff3a5c;--water:#0a7aff;--move:#22d060;--rest:#ffc800;--pur:#c050ff;--teal:#30e0ff;--pink:#ff2080;
+  --foodg:linear-gradient(135deg,#7a0022,#cc1040,#ff3a5c);
+  --waterg:linear-gradient(135deg,#003080,#005acc,#0a7aff);
+  --moveg:linear-gradient(135deg,#083820,#10682a,#22d060);
+  --restg:linear-gradient(135deg,#6a4400,#c07800,#ffc800);
+  --purg:linear-gradient(135deg,#1a0038,#5a00a0,#c050ff);
+  --grad:linear-gradient(135deg,#c050ff,#ff3a5c);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 50% at 10% 8%,rgba(192,80,255,.09) 0%,transparent 55%),
+  radial-gradient(ellipse 60% 40% at 90% 92%,rgba(255,58,92,.07) 0%,transparent 55%);}
+.pg{position:relative;z-index:1;max-width:940px;margin:0 auto;padding:0 16px 80px}
+
+/* ── HEADER ── */
+.hdr{padding:28px 0 22px;text-align:center;border-bottom:1px solid var(--brd);margin-bottom:22px}
+.htag{display:inline-flex;align-items:center;gap:7px;background:rgba(255,200,0,.08);border:1px solid rgba(255,200,0,.28);
+  border-radius:50px;padding:6px 18px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--rest);margin-bottom:16px}
+.hdr h1{font-family:'Cairo',sans-serif;font-size:clamp(22px,5vw,40px);font-weight:900;margin-bottom:10px;
+  background:linear-gradient(135deg,#fff 0%,var(--rest) 25%,var(--food) 55%,var(--pur) 85%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hbtns{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.hb{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:13px;
+  font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;cursor:pointer;border:none;transition:transform .2s,filter .2s;text-decoration:none}
+.hb:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.hb-g{background:var(--grad);color:#fff;box-shadow:0 4px 18px rgba(192,80,255,.3)}
+.hb-t{background:linear-gradient(135deg,#075e54,#128c7e);color:#fff}
+.hb-s{background:var(--c1);border:1px solid var(--brd);color:var(--text)}
+
+/* ── STATS ── */
+.stats{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:var(--c1);border:1px solid var(--brd);border-radius:16px;padding:15px;flex:1;min-width:90px;text-align:center;transition:border-color .2s}
+.stat:hover{border-color:rgba(192,80,255,.25)}
+.sv{font-size:26px;font-weight:900;display:block}
+.sl{font-size:10px;color:var(--muted);display:block;margin-top:3px}
+.lu{text-align:center;font-size:11px;color:var(--muted);margin-bottom:20px}
+.lud{color:var(--teal);font-weight:700}
+
+/* ── CAT BARS ── */
+.cat-overview{background:var(--c1);border:1px solid var(--brd);border-radius:18px;padding:18px;margin-bottom:20px}
+.co-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.cat-rows{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cr{display:flex;align-items:center;gap:9px}
+.cr-ico{font-size:16px;flex-shrink:0;width:22px;text-align:center}
+.cr-nm{font-size:11px;font-weight:700;width:52px;flex-shrink:0}
+.cr-bar{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:8px;overflow:hidden}
+.cr-fill{height:100%;border-radius:8px;transition:width .6s ease}
+.cr-n{font-size:10px;font-weight:700;width:24px;text-align:left}
+
+/* ── SECTION ── */
+.sec-hd{display:flex;align-items:center;gap:12px;margin:26px 0 13px}
+.sh-l{flex:1;height:1px;background:linear-gradient(90deg,rgba(192,80,255,.4),transparent)}
+.sh-l.r{background:linear-gradient(90deg,transparent,rgba(192,80,255,.4))}
+.sh-t{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--pur);white-space:nowrap}
+
+/* ── TOP 3 ── */
+.top3{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:10px;margin-bottom:20px}
+.t3c{border-radius:20px;padding:18px 12px;text-align:center;position:relative;overflow:hidden;transition:transform .2s}
+.t3c:hover{transform:translateY(-2px)}
+.t3c.g1{background:linear-gradient(135deg,rgba(255,200,0,.13),rgba(255,120,0,.07));border:1.5px solid rgba(255,200,0,.32);transform:scale(1.03)}
+.t3c.g2{background:rgba(255,255,255,.04);border:1px solid rgba(180,180,200,.22)}
+.t3c.g3{background:rgba(255,255,255,.03);border:1px solid rgba(200,120,50,.22)}
+.t3-cr{font-size:26px;margin-bottom:6px;display:block}
+.t3-nm{font-size:13px;font-weight:900;margin-bottom:3px}
+.t3-pt{font-size:20px;font-weight:900}
+.g1 .t3-pt{color:var(--rest)}.g2 .t3-pt{color:#bbb}.g3 .t3-pt{color:#cd7f32}
+.t3-sb{font-size:10px;color:var(--muted);margin-top:3px}
+
+/* ── ACTIVITY ── */
+.act-list{display:flex;flex-direction:column;gap:7px;max-height:250px;overflow-y:auto}
+.act-item{display:flex;align-items:center;gap:11px;background:var(--c1);border:1px solid var(--brd);border-radius:12px;padding:9px 13px}
+.act-ico{font-size:16px;flex-shrink:0}
+.act-nm{font-size:13px;font-weight:900}
+.act-dt{font-size:10px;color:var(--muted);margin-top:1px}
+.cat-dots{display:flex;gap:3px;margin-top:3px}
+.cat-dot{width:8px;height:8px;border-radius:50%}
+
+/* ── WEEKLY CHALLENGE ── */
+.wc-card{background:linear-gradient(135deg,rgba(255,200,0,.09),rgba(255,80,130,.05));border:1px solid rgba(255,200,0,.28);border-radius:20px;padding:20px}
+.wc-form{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.wf-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+.wi{background:rgba(255,255,255,.05);border:1px solid var(--brd);border-radius:12px;padding:11px 14px;font-family:'Tajawal',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s;direction:rtl}
+.wi:focus{border-color:rgba(255,200,0,.4)}
+.wi::placeholder{color:var(--muted)}
+.wi.full{grid-column:1/-1}
+.cb-wc{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer}
+.cb-wc input{width:18px;height:18px;accent-color:var(--pur);cursor:pointer}
+.btn-wc{padding:11px 20px;background:linear-gradient(135deg,var(--rest),var(--food));color:#0a0a14;border:none;border-radius:12px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;cursor:pointer;white-space:nowrap}
+.btn-wc:hover{filter:brightness(1.1)}
+.wc-current{background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:12px;padding:13px;margin-top:12px;font-size:13px;color:var(--muted)}
+.wc-cur-t{font-size:13px;font-weight:900;color:var(--rest);margin-bottom:4px}
+
+/* ── FILTERS ── */
+.frow{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.ft{padding:6px 13px;border-radius:9px;font-family:'Tajawal',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--brd);background:var(--c1);color:var(--muted);transition:all .2s}
+.ft:hover,.ft.on{background:rgba(192,80,255,.12);border-color:rgba(192,80,255,.35);color:var(--text)}
+.sinp{flex:1;min-width:130px;padding:7px 13px;border-radius:9px;background:var(--c1);border:1px solid var(--brd);color:var(--text);font-family:'Tajawal',sans-serif;font-size:12px;outline:none;direction:rtl}
+.sinp:focus{border-color:rgba(192,80,255,.4)}
+.sinp::placeholder{color:var(--muted)}
+.ssel{padding:7px 11px;border-radius:9px;background:var(--c1);border:1px solid var(--brd);color:var(--text);font-family:'Tajawal',sans-serif;font-size:12px;cursor:pointer;outline:none}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;border-radius:18px;border:1px solid var(--brd)}
+table{width:100%;border-collapse:collapse;min-width:620px}
+thead tr{background:rgba(255,255,255,.03);border-bottom:1px solid var(--brd)}
+th{padding:11px 13px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:right}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .2s;cursor:pointer}
+tbody tr:last-child{border:none}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+td{padding:12px 13px;font-size:13px;vertical-align:middle}
+.td-r{font-size:15px;font-weight:900;text-align:center;width:36px}
+.td-nm{font-weight:900}
+.td-sb{font-size:10px;color:var(--muted);margin-top:2px}
+.td-pt{font-weight:900;color:var(--rest)}
+.str{color:var(--food);font-weight:900}
+.abt{display:flex;gap:5px}
+.ab{padding:4px 8px;border-radius:7px;border:1px solid var(--brd);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;transition:all .2s}
+.ab:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.ab.del:hover{background:rgba(255,58,92,.1);border-color:rgba(255,58,92,.3);color:var(--food)}
+.empty-r td{text-align:center;padding:36px;color:var(--muted)}
+
+/* Goal tags */
+.goal-tags{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+.gtag{display:inline-block;border-radius:50px;padding:1px 7px;font-size:9px;font-weight:700}
+.gt-food{background:rgba(255,58,92,.15);color:var(--food)}
+.gt-water{background:rgba(10,122,255,.15);color:var(--water)}
+.gt-move{background:rgba(34,208,96,.15);color:var(--move)}
+.gt-rest{background:rgba(255,200,0,.15);color:var(--rest)}
+
+/* Cat bars mini */
+.cat-mini{display:flex;gap:3px;margin-top:3px}
+.cm{width:10px;height:10px;border-radius:3px}
+
+/* ── MODAL ── */
+.mover{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.85);backdrop-filter:blur(16px);
+  display:flex;align-items:flex-start;justify-content:center;padding:18px;overflow-y:auto}
+.mover.hide{display:none}
+.mbox{background:#080818;border:1px solid rgba(192,80,255,.28);border-radius:24px;padding:26px 22px;width:100%;max-width:580px;margin:auto}
+.mt{font-family:'Cairo',sans-serif;font-size:18px;font-weight:900;margin-bottom:6px}
+.mcls{float:left;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0;line-height:1}
+.mcls:hover{color:var(--text)}
+
+/* Player detail */
+.pd-hero{background:linear-gradient(135deg,rgba(192,80,255,.1),rgba(255,58,92,.06));border:1px solid rgba(192,80,255,.2);border-radius:18px;padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.pd-av{width:52px;height:52px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.pd-nm{font-size:19px;font-weight:900;margin-bottom:3px}
+.pd-sb{font-size:11px;color:var(--muted);line-height:1.7}
+.pd-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.pds{background:var(--c1);border:1px solid var(--brd);border-radius:11px;padding:11px;text-align:center}
+.pdsv{font-size:19px;font-weight:900;display:block}
+.pdsl{font-size:9px;color:var(--muted);display:block;margin-top:2px}
+
+/* Cat detail bars */
+.cat-detail{background:var(--c2);border-radius:14px;padding:14px;margin-bottom:14px}
+.cd-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+.cd-rows{display:flex;flex-direction:column;gap:8px}
+.cd-row{display:flex;align-items:center;gap:8px}
+.cd-ico{font-size:15px;flex-shrink:0;width:20px;text-align:center}
+.cd-nm{font-size:11px;font-weight:700;width:48px;flex-shrink:0}
+.cd-bar{flex:1;height:7px;background:rgba(255,255,255,.07);border-radius:7px;overflow:hidden}
+.cd-fill{height:100%;border-radius:7px}
+.cd-cnt{font-size:10px;font-weight:700;width:22px;text-align:left}
+
+/* Cal 28 */
+.cal28{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:14px}
+.c28{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:1px solid var(--brd);background:var(--c1);position:relative}
+.c28.dn{background:rgba(34,208,96,.13);border-color:rgba(34,208,96,.35)}
+.c28.pd{background:rgba(255,200,0,.1);border-color:rgba(255,200,0,.28)}
+.c28.no{background:rgba(255,58,92,.09);border-color:rgba(255,58,92,.22)}
+.c28.ft{opacity:.22}
+.c28-bar{position:absolute;bottom:1px;display:flex;gap:1px}
+.c28-dot{width:3px;height:3px;border-radius:50%}
+
+/* Badges */
+.bgrow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.bgm{display:flex;align-items:center;gap:4px;background:var(--c1);border:1px solid var(--brd);border-radius:50px;padding:4px 10px;font-size:11px;font-weight:700}
+.bgm.e{background:rgba(192,80,255,.1);border-color:rgba(192,80,255,.3)}
+.bgm.l{opacity:.3;filter:grayscale(.8)}
+
+/* Day log */
+.daylog{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto;margin-bottom:14px}
+.dl-day{background:var(--c1);border:1px solid var(--brd);border-radius:12px;padding:11px 13px}
+.dl-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.dl-dn{font-size:12px;font-weight:900}
+.dl-pts{font-size:11px;font-weight:700;color:var(--rest);margin-right:auto;margin-left:0}
+.dl-slots{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.dl-sl{background:rgba(255,255,255,.03);border-radius:8px;padding:8px 10px}
+.dl-sl-h{font-size:9px;color:var(--muted);margin-bottom:3px}
+.dl-sl-n{font-size:11px;font-weight:700;line-height:1.4}
+.dl-sl-s{font-size:10px;margin-top:3px}
+.dl-note{font-size:10px;color:var(--teal);margin-top:3px;font-style:italic}
+.st-ok{color:var(--move)}.st-al{color:var(--teal)}.st-sk{color:var(--muted)}.st-no{color:var(--food)}
+
+/* Note */
+.note-a{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:12px;padding:11px 13px;
+  font-family:'Tajawal',sans-serif;font-size:13px;color:var(--text);min-height:75px;resize:vertical;direction:rtl;outline:none;transition:border-color .2s;margin-top:10px}
+.note-a:focus{border-color:rgba(192,80,255,.4)}
+.bsn{margin-top:7px;padding:10px 18px;background:var(--grad);color:#fff;border:none;border-radius:11px;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:900;cursor:pointer}
+
+/* Import */
+.imp-a{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:12px;padding:11px;
+  font-family:'Tajawal',sans-serif;font-size:11px;color:var(--text);min-height:75px;resize:vertical;direction:ltr;text-align:left;outline:none;margin-bottom:11px}
+.bimp{width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),var(--water));color:#0a0a14;border:none;border-radius:13px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:7px}
+.bcnl{width:100%;padding:11px;background:transparent;border:1px solid var(--brd);color:var(--muted);border-radius:13px;font-family:'Tajawal',sans-serif;font-size:13px;cursor:pointer}
+.badd{width:100%;padding:13px;background:linear-gradient(135deg,var(--move),#00b860);color:#0a0a14;border:none;border-radius:13px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:7px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.fi{display:flex;flex-direction:column;gap:5px}
+.fi label{font-size:11px;font-weight:700;color:var(--muted)}
+.fi input,.fi select{padding:9px 12px;background:rgba(255,255,255,.05);border:1px solid var(--brd);border-radius:11px;font-family:'Tajawal',sans-serif;font-size:13px;color:var(--text);outline:none;direction:rtl}
+.fi input:focus,.fi select:focus{border-color:rgba(192,80,255,.4)}
+.fi.full{grid-column:1/-1}
+
+/* Toast */
+.tst{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);border-radius:50px;padding:11px 22px;font-size:13px;font-weight:900;z-index:200;white-space:nowrap;transition:opacity .3s}
+.tst.hide{opacity:0;pointer-events:none}
+.tst.ok{background:rgba(34,208,96,.18);border:1px solid rgba(34,208,96,.3);color:var(--move)}
+.tst.err{background:rgba(255,58,92,.18);border:1px solid rgba(255,58,92,.3);color:var(--food)}
+.tst.info{background:rgba(192,80,255,.18);border:1px solid rgba(192,80,255,.3);color:#d8b4fe}
+.spin{display:inline-block;width:26px;height:26px;border:3px solid rgba(192,80,255,.25);border-top-color:var(--pur);border-radius:50%;animation:sp 1s linear infinite;margin-bottom:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+@media(max-width:580px){
+  .top3,.cat-rows{grid-template-columns:1fr}.pd-stats{grid-template-columns:1fr 1fr}
+  .fg{grid-template-columns:1fr}.fi.full{grid-column:1}.stats{gap:6px}.sv{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="htag">📊 لوحة الإدارة v4</div>
+  <h1>🃏 أونو الصحة</h1>
+  <div class="hbtns">
+    <a href="uno-game-v4.html" target="_blank" class="hb hb-g">🎴 اللعبة</a>
+    <button class="hb hb-t" onclick="openM('impM')">📲 استيراد كود</button>
+    <button class="hb hb-s" onclick="loadAll()">🔄 تحديث</button>
+    <button class="hb hb-s" onclick="openM('addM')">➕ إضافة</button>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><span class="sv" id="stT" style="color:var(--pur)">٠</span><span class="sl">المشتركات</span></div>
+  <div class="stat"><span class="sv" id="stA" style="color:var(--teal)">٠</span><span class="sl">نشطات اليوم</span></div>
+  <div class="stat"><span class="sv" id="stP" style="color:var(--rest)">٠</span><span class="sl">متوسط النقاط</span></div>
+  <div class="stat"><span class="sv" id="stD" style="color:var(--move)">٠</span><span class="sl">أتممن</span></div>
+  <div class="stat"><span class="sv" id="stS" style="color:var(--food)">٠</span><span class="sl">أعلى Streak</span></div>
+  <div class="stat"><span class="sv" id="stAlt" style="color:var(--teal)">٠</span><span class="sl">بديل × اليوم</span></div>
+</div>
+<div class="lu">آخر تحديث: <span class="lud" id="lu">—</span></div>
+
+<!-- CAT OVERVIEW -->
+<div class="cat-overview">
+  <div class="co-title">📊 توزيع المهام المكتملة بالفئات</div>
+  <div class="cat-rows" id="catOverview"></div>
+</div>
+
+<!-- WEEKLY CHALLENGE -->
+<div class="sec-hd"><div class="sh-l"></div><div class="sh-t">⭐ تحدي الأسبوع</div><div class="sh-l r"></div></div>
+<div class="wc-card">
+  <div style="font-size:13px;color:var(--muted);margin-bottom:14px">اكتبي تحدي الأسبوع ليظهر لجميع المشتركات في أعلى شاشة اللعبة</div>
+  <div class="wc-form">
+    <div class="wf-row">
+      <input class="wi" id="wcTitle" type="text" placeholder="عنوان التحدي — مثال: أسبوع الماء 💧">
+      <label class="cb-wc"><input type="checkbox" id="wcActive" checked> مفعّل</label>
+    </div>
+    <input class="wi full" id="wcDesc" type="text" placeholder="وصف التحدي — مثال: اشربي ٨ أكواب ماء يومياً هذا الأسبوع">
+    <button class="btn-wc" onclick="saveWeeklyChallenge()">💾 حفظ تحدي الأسبوع</button>
+  </div>
+  <div class="wc-current" id="wcCurrent" style="display:none">
+    <div class="wc-cur-t" id="wcCurT"></div>
+    <div style="font-size:11px;color:var(--muted)" id="wcCurS"></div>
+  </div>
+</div>
+
+<!-- TOP 3 -->
+<div class="sec-hd"><div class="sh-l"></div><div class="sh-t">🥇 المتصدرات</div><div class="sh-l r"></div></div>
+<div class="top3" id="top3"></div>
+
+<!-- ACTIVITY -->
+<div class="sec-hd"><div class="sh-l"></div><div class="sh-t">⚡ آخر النشاطات</div><div class="sh-l r"></div></div>
+<div class="act-list" id="actList"><div style="text-align:center;padding:22px;color:var(--muted)"><div class="spin"></div><div>جاري التحميل...</div></div></div>
+
+<!-- TABLE -->
+<div class="sec-hd"><div class="sh-l"></div><div class="sh-t">👥 جميع المشتركات</div><div class="sh-l r"></div></div>
+<div class="frow">
+  <input class="sinp" id="srch" placeholder="🔍 بحث بالاسم..." oninput="renderTbl()">
+  <button class="ft on" onclick="setF('all',this)">الكل</button>
+  <button class="ft" onclick="setF('active',this)">🟢 نشطات</button>
+  <button class="ft" onclick="setF('done',this)">✅ منتهيات</button>
+  <button class="ft" onclick="setF('goals',this)">🎯 بأهداف</button>
+  <select class="ssel" id="srt" onchange="renderTbl()">
+    <option value="pts">النقاط</option>
+    <option value="day">اليوم</option>
+    <option value="name">الاسم</option>
+    <option value="streak">Streak</option>
+  </select>
+</div>
+<div class="tw">
+  <table>
+    <thead><tr>
+      <th>#</th><th>المشتركة</th><th>نقاط</th><th>يوم</th><th>الفئات</th><th>🔥</th><th>الهدف</th><th>آخر نشاط</th><th>أدوات</th>
+    </tr></thead>
+    <tbody id="tbl"><tr class="empty-r"><td colspan="9"><div class="spin" style="margin:0 auto 8px"></div><div>جاري التحميل...</div></td></tr></tbody>
+  </table>
+</div>
+
+</div><!-- /pg -->
+
+<!-- PLAYER DETAIL -->
+<div class="mover hide" id="pdM">
+  <div class="mbox"><button class="mcls" onclick="closeM('pdM')">✕</button><div id="pdC"></div></div>
+</div>
+<!-- IMPORT -->
+<div class="mover hide" id="impM">
+  <div class="mbox">
+    <button class="mcls" onclick="closeM('impM')">✕</button>
+    <div class="mt">📲 استيراد كود</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px">الصقي الكود اللي أرسلته المشتركة من اللعبة</p>
+    <textarea class="imp-a" id="impC" placeholder="الصقي الكود هنا..."></textarea>
+    <button class="bimp" onclick="importCode()">✅ استيراد</button>
+    <button class="bcnl" onclick="closeM('impM')">إلغاء</button>
+  </div>
+</div>
+<!-- ADD -->
+<div class="mover hide" id="addM">
+  <div class="mbox">
+    <button class="mcls" onclick="closeM('addM')">✕</button>
+    <div class="mt">➕ إضافة يدوية</div>
+    <div class="fg">
+      <div class="fi full"><label>الاسم</label><input id="fN" type="text" placeholder="اسم المشتركة"></div>
+      <div class="fi"><label>اليوم</label><input id="fD" type="number" min="0" max="28" value="0"></div>
+      <div class="fi"><label>النقاط</label><input id="fP" type="number" min="0" value="0"></div>
+      <div class="fi"><label>Streak</label><input id="fS" type="number" min="0" value="0"></div>
+    </div>
+    <button class="badd" onclick="addPlayer()">✅ إضافة</button>
+    <button class="bcnl" onclick="closeM('addM')">إلغاء</button>
+  </div>
+</div>
+
+<div class="tst hide" id="tst"></div>
+
+<script>
+// ══════════════════════════════════
+// FIREBASE
+// ══════════════════════════════════
+const FC={apiKey:"AIzaSyCPa2-MXRWOZAp0O51PPLmKdVqsl-WZE-o",authDomain:"uno24-cd34c.firebaseapp.com",projectId:"uno24-cd34c",storageBucket:"uno24-cd34c.firebasestorage.app",messagingSenderId:"13768168936",appId:"1:13768168936:web:9bb59cbfbe1d5e47c4805d"};
+let db=null;
+try{firebase.initializeApp(FC);db=firebase.firestore();}catch(e){}
+
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let players=[];
+let curF='all';
+const ar=n=>String(Math.round(n||0)).replace(/\d/g,d=>'٠١٢٣٤٥٦٧٨٩'[d]);
+const TODAY=new Date().toISOString().split('T')[0];
+const CDOTS={food:'#ff3a5c',water:'#0a7aff',move:'#22d060',rest:'#ffc800',special:'#c050ff'};
+const CATS_INFO={food:{ic:'🍽️',nm:'تغذية',col:'var(--food)',fill:'rgba(255,58,92,.6)'},water:{ic:'💧',nm:'ماء',col:'var(--water)',fill:'rgba(10,122,255,.6)'},move:{ic:'🏃‍♀️',nm:'حركة',col:'var(--move)',fill:'rgba(34,208,96,.6)'},rest:{ic:'😴',nm:'راحة',col:'var(--rest)',fill:'rgba(255,200,0,.6)'}};
+const GOAL_LABELS={food:'🍽️',water:'💧',move:'🏃‍♀️',rest:'🌙'};
+const BDGS=[
+  {id:'day3',e:'🔥',l:'٣ أيام'},{id:'day7',e:'⚡',l:'أسبوع'},{id:'pts100',e:'💎',l:'١٠٠ نقطة'},
+  {id:'pts300',e:'🌟',l:'٣٠٠'},{id:'pts500',e:'👑',l:'٥٠٠'},{id:'pts1000',e:'💫',l:'١٠٠٠'},
+  {id:'t20',e:'✅',l:'٢٠ مهمة'},{id:'t50',e:'🌸',l:'٥٠'},{id:'t100',e:'🎖️',l:'١٠٠'},
+  {id:'full4',e:'🎴',l:'٤/٤'},{id:'full7',e:'🎪',l:'٧ أيام كاملة'},{id:'wild',e:'🌈',l:'Wild'},
+  {id:'skip',e:'⛔',l:'استراحة'},{id:'alt5',e:'🌿',l:'بديل ٥×'},{id:'done28',e:'🏆',l:'٢٨ يوم'},
+];
+
+// ══════════════════════════════════
+// LOAD
+// ══════════════════════════════════
+async function loadAll(){
+  if(!db){toast('Firebase غير متصل','err');return;}
+  try{
+    const snap=await db.collection('uno_players').get();
+    players=snap.docs.map(d=>({...d.data(),docId:d.id}));
+    players.sort((a,b)=>(b.pts||0)-(a.pts||0));
+    renderAll();
+    document.getElementById('lu').textContent=new Date().toLocaleTimeString('ar');
+    loadWeeklyChallengeAdmin();
+  }catch(e){toast('خطأ في التحميل','err');}
+}
+
+function startListener(){
+  if(!db)return;
+  db.collection('uno_players').onSnapshot(snap=>{
+    players=snap.docs.map(d=>({...d.data(),docId:d.id}));
+    players.sort((a,b)=>(b.pts||0)-(a.pts||0));
+    renderAll();
+    document.getElementById('lu').textContent=new Date().toLocaleTimeString('ar');
+  },()=>{});
+}
+
+// ══════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════
+function renderAll(){renderStats();renderCatOverview();renderTop3();renderActivity();renderTbl();}
+
+function renderStats(){
+  const tot=players.length;
+  const active=players.filter(p=>p.dayLog?.some(d=>d.date===TODAY)||false).length;
+  const avg=tot?Math.round(players.reduce((s,p)=>s+(p.pts||0),0)/tot):0;
+  const done=players.filter(p=>(p.day||0)>28).length;
+  const maxS=players.reduce((m,p)=>Math.max(m,p.streak||0),0);
+  const altTotal=players.reduce((t,p)=>t+(p.altCount||0),0);
+  document.getElementById('stT').textContent=ar(tot);
+  document.getElementById('stA').textContent=ar(active);
+  document.getElementById('stP').textContent=ar(avg);
+  document.getElementById('stD').textContent=ar(done);
+  document.getElementById('stS').textContent=ar(maxS);
+  document.getElementById('stAlt').textContent=ar(altTotal);
+}
+
+function renderCatOverview(){
+  const totals={food:0,water:0,move:0,rest:0};
+  players.forEach(p=>{
+    const cs=p.catStats||{};
+    Object.keys(totals).forEach(k=>totals[k]+=(cs[k]||0));
+  });
+  const max=Math.max(...Object.values(totals))||1;
+  const el=document.getElementById('catOverview');
+  el.innerHTML=Object.entries(CATS_INFO).map(([k,c])=>`
+    <div class="cr">
+      <span class="cr-ico">${c.ic}</span>
+      <span class="cr-nm">${c.nm}</span>
+      <div class="cr-bar"><div class="cr-fill" style="width:${Math.round(totals[k]/max*100)}%;background:${c.fill}"></div></div>
+      <span class="cr-n" style="color:${c.col}">${ar(totals[k])}</span>
+    </div>`).join('');
+}
+
+function renderTop3(){
+  const sorted=[...players].sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,3);
+  const disp=[sorted[1],sorted[0],sorted[2]];
+  const rc=['g2','g1','g3'];const cr=['🥈','🥇','🥉'];
+  document.getElementById('top3').innerHTML=disp.map((p,i)=>{
+    if(!p)return`<div class="t3c ${rc[i]}"><span class="t3-cr">${cr[i]}</span><div style="opacity:.3;font-size:18px;margin:8px 0">—</div></div>`;
+    const cs=p.catStats||{};const bestCat=Object.entries(cs).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const bdgs=(p.earnedBadges||[]).slice(0,3).map(id=>BDGS.find(x=>x.id===id)?.e||'').join('');
+    return`<div class="t3c ${rc[i]}">
+      <span class="t3-cr">${cr[i]}</span>
+      <div class="t3-nm">${p.name||'—'}</div>
+      <div class="t3-pt">${ar(p.pts||0)}</div>
+      <div class="t3-sb">يوم ${ar(p.day||0)} · 🔥${ar(p.streak||0)} ${bdgs}${bestCat?` · ${CATS_INFO[bestCat]?.ic||''}`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderActivity(){
+  const al=document.getElementById('actList');
+  const sorted=[...players].filter(p=>p.dayLog?.length).sort((a,b)=>(b.dayLog?.length||0)-(a.dayLog?.length||0)).slice(0,7);
+  if(!sorted.length){al.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">لا يوجد نشاط بعد</div>';return;}
+  al.innerHTML=sorted.map(p=>{
+    const last=p.dayLog?.[p.dayLog.length-1];
+    const cs=p.catStats||{};
+    const catDots=Object.entries(CATS_INFO).map(([k,c])=>cs[k]?`<div class="cat-dot" style="background:${CDOTS[k]};width:${Math.max(6,Math.min(16,Math.round((cs[k]||0)/Math.max(...Object.values(cs)||[1])*14)))}px"></div>`:'').join('');
+    return`<div class="act-item">
+      <div class="act-ico">🃏</div>
+      <div style="flex:1">
+        <div class="act-nm">${p.name||'—'} ${(p.earnedBadges||[]).slice(0,2).map(id=>BDGS.find(x=>x.id===id)?.e||'').join('')}</div>
+        <div class="act-dt">يوم ${ar(p.day||0)} · ${ar(p.pts||0)} نقطة · 🔥${ar(p.streak||0)}</div>
+        <div class="cat-dots">${catDots}</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted)">${last?.date||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════
+// TABLE
+// ══════════════════════════════════
+function renderTbl(){
+  const body=document.getElementById('tbl');
+  const q=(document.getElementById('srch').value||'').trim().toLowerCase();
+  const sort=document.getElementById('srt').value;
+  let list=[...players];
+  if(curF==='active')list=list.filter(p=>p.dayLog?.some(d=>d.date===TODAY));
+  if(curF==='done')list=list.filter(p=>(p.day||0)>28);
+  if(curF==='goals')list=list.filter(p=>(p.goals||[]).length>0);
+  if(q)list=list.filter(p=>(p.name||'').toLowerCase().includes(q));
+  if(sort==='pts')list.sort((a,b)=>(b.pts||0)-(a.pts||0));
+  else if(sort==='day')list.sort((a,b)=>(b.day||0)-(a.day||0));
+  else if(sort==='name')list.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  else if(sort==='streak')list.sort((a,b)=>(b.streak||0)-(a.streak||0));
+  if(!list.length){body.innerHTML='<tr class="empty-r"><td colspan="9">لا توجد نتائج</td></tr>';return;}
+  body.innerHTML=list.map((p,i)=>{
+    const rank=i===0?'🥇':i===1?'🥈':i===2?'🥉':ar(i+1);
+    const cs=p.catStats||{};
+    const catMini=Object.entries(CATS_INFO).map(([k,c])=>cs[k]?`<div class="cm" style="background:${CDOTS[k]};opacity:${0.3+Math.min(.7,cs[k]/20)};" title="${c.nm}: ${ar(cs[k])}"></div>`:`<div class="cm" style="background:rgba(255,255,255,.06)"></div>`).join('');
+    const goals=(p.goals||[]).map(g=>`<div class="gtag gt-${g}">${GOAL_LABELS[g]||''}</div>`).join('');
+    const scol=(p.streak||0)>=7?'var(--rest)':(p.streak||0)>=3?'var(--food)':'var(--muted)';
+    const isActive=p.dayLog?.some(d=>d.date===TODAY);
+    const bdgs=(p.earnedBadges||[]).length;
+    return`<tr onclick="openPlayer('${p.id||p.docId}')">
+      <td class="td-r">${rank}</td>
+      <td>
+        <div class="td-nm">${p.name||'—'} ${isActive?'<span style="color:var(--move);font-size:10px">●</span>':''}</div>
+        <div class="td-sb">${ar(bdgs)} شارة · ${p.email||'—'}</div>
+      </td>
+      <td class="td-pt">${ar(p.pts||0)}</td>
+      <td style="font-weight:700">يوم ${ar(p.day||0)}</td>
+      <td>
+        <div class="cat-mini">${catMini}</div>
+        <div style="font-size:9px;color:var(--muted);margin-top:3px">
+          ${Object.entries(cs).filter(([,v])=>v>0).map(([k,v])=>`${CATS_INFO[k]?.ic||''}${ar(v)}`).join(' ')||'—'}
+        </div>
+      </td>
+      <td><span class="str" style="color:${scol}">🔥${ar(p.streak||0)}</span></td>
+      <td><div class="goal-tags">${goals||'<span style="font-size:10px;color:var(--muted)">—</span>'}</div></td>
+      <td style="font-size:11px;color:var(--muted)">${p.dayLog?.slice(-1)[0]?.date||'—'}</td>
+      <td><div class="abt">
+        <button class="ab" onclick="event.stopPropagation();openPlayer('${p.id||p.docId}')">👁️</button>
+        <button class="ab del" onclick="event.stopPropagation();delPlayer('${p.docId||p.id}','${p.name}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function setF(f,el){curF=f;document.querySelectorAll('.ft').forEach(b=>b.classList.remove('on'));el.classList.add('on');renderTbl();}
+
+// ══════════════════════════════════
+// PLAYER DETAIL
+// ══════════════════════════════════
+function openPlayer(pid){
+  const p=players.find(x=>x.id===pid||x.docId===pid);if(!p)return;
+  const cs=p.catStats||{};const total=Object.values(cs).reduce((a,b)=>a+b,0)||1;
+  // Cal 28
+  let cal='<div class="cal28">';
+  for(let d=1;d<=28;d++){
+    const log=(p.dayLog||[]).find(l=>l.day===d);
+    if(!log){cal+=`<div class="c28 ft"><span style="font-size:9px;font-weight:700">${ar(d)}</span></div>`;continue;}
+    const cls=log.done>0?'dn':'no';
+    const emo=log.done>0?'✅':'';
+    cal+=`<div class="c28 ${cls}"><span style="font-size:9px;font-weight:700">${ar(d)}</span><span style="font-size:10px">${emo}</span></div>`;
+  }
+  cal+='</div>';
+  // Badges
+  const bgRow='<div class="bgrow">'+BDGS.map(b=>{const e=(p.earnedBadges||[]).includes(b.id);return`<div class="bgm ${e?'e':'l'}">${b.e} ${b.l}</div>`;}).join('')+'</div>';
+  // Cat detail bars
+  const catBars='<div class="cat-detail"><div class="cd-title">توزيع المهام بالفئات</div><div class="cd-rows">'+
+    Object.entries(CATS_INFO).map(([k,c])=>`<div class="cd-row">
+      <span class="cd-ico">${c.ic}</span><span class="cd-nm">${c.nm}</span>
+      <div class="cd-bar"><div class="cd-fill" style="width:${Math.round((cs[k]||0)/total*100)}%;background:${c.fill}"></div></div>
+      <span class="cd-cnt" style="color:${c.col}">${ar(cs[k]||0)}</span>
+    </div>`).join('')+'</div></div>';
+  // Day log
+  const dlHTML=(p.dayLog||[]).slice(-7).reverse().map(d=>{
+    const cards=(d.cards||[]);
+    const slots=cards.slice(0,4).map((c,si)=>{
+      if(!c.nm)return`<div class="dl-sl"><div class="dl-sl-h">—</div></div>`;
+      const sCls={done:'st-ok',alt:'st-al',skip:'st-sk',no:'st-no',skipped:'st-sk'}[c.status]||'';
+      const sTxt={done:'✅ أتممت',alt:'💡 بديل',skip:'⛔ راحة',skipped:'❌ تخطي',no:'❌ تخطي'}[c.status]||'—';
+      const catInfo=c.cat&&CATS_INFO[c.cat]?CATS_INFO[c.cat]:null;
+      return`<div class="dl-sl">
+        <div class="dl-sl-h">${catInfo?catInfo.ic:''} ${catInfo?catInfo.nm:'خاص'}</div>
+        <div class="dl-sl-n">${c.nm||'—'}</div>
+        <div class="dl-sl-s ${sCls}">${sTxt}${c.earned?` · +${ar(c.earned)}`:''}</div>
+        ${c.note?`<div class="dl-note">📝 "${c.note}"</div>`:''}
+      </div>`;
+    }).join('');
+    return`<div class="dl-day">
+      <div class="dl-hd">
+        <span class="dl-dn">يوم ${ar(d.day)} · ${d.date||''}</span>
+        <span class="dl-pts">+${ar(d.pts||0)} نقطة</span>
+      </div>
+      <div class="dl-slots">${slots||'<div style="color:var(--muted);font-size:11px;padding:6px">لا يوجد سجل</div>'}</div>
+    </div>`;
+  }).join('');
+  // Special stats
+  const goals=(p.goals||[]).map(g=>`<div class="gtag gt-${g}" style="font-size:12px;padding:4px 12px;">${GOAL_LABELS[g]||''} ${g==='food'?'تغذية':g==='water'?'ماء':g==='move'?'حركة':'راحة'}</div>`).join('');
+  document.getElementById('pdC').innerHTML=`
+    <div class="pd-hero">
+      <div class="pd-av">🌸</div>
+      <div>
+        <div class="pd-nm">${p.name||'—'}</div>
+        <div class="pd-sb">يوم ${ar(p.day||0)}/٢٨ · بدأت: ${p.dayLog?.[0]?.date||'—'} · إيميل: ${p.email||'—'}</div>
+        ${goals?`<div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap">${goals}</div>`:''}
+      </div>
+    </div>
+    <div class="pd-stats">
+      <div class="pds"><span class="pdsv" style="color:var(--rest)">${ar(p.pts||0)}</span><span class="pdsl">نقاط</span></div>
+      <div class="pds"><span class="pdsv" style="color:var(--food)">🔥${ar(p.streak||0)}</span><span class="pdsl">Streak</span></div>
+      <div class="pds"><span class="pdsv" style="color:var(--pur)">${ar(p.totalDone||0)}</span><span class="pdsl">✅ مهام</span></div>
+      <div class="pds"><span class="pdsv" style="color:var(--teal)">${ar(p.altCount||0)}</span><span class="pdsl">🌿 بديل</span></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;font-size:12px;">
+      <div style="background:rgba(192,80,255,.1);border:1px solid rgba(192,80,255,.2);border-radius:10px;padding:8px 12px;flex:1;text-align:center">
+        <div style="font-size:17px;font-weight:900;color:var(--pur2)">${ar(p.wildCount||0)}</div><div style="color:var(--muted);font-size:10px">🌈 Wild</div>
+      </div>
+      <div style="background:rgba(255,58,92,.08);border:1px solid rgba(255,58,92,.18);border-radius:10px;padding:8px 12px;flex:1;text-align:center">
+        <div style="font-size:17px;font-weight:900;color:var(--food)">${ar(p.skipCount||0)}</div><div style="color:var(--muted);font-size:10px">⛔ Skip</div>
+      </div>
+      <div style="background:rgba(34,208,96,.08);border:1px solid rgba(34,208,96,.18);border-radius:10px;padding:8px 12px;flex:1;text-align:center">
+        <div style="font-size:17px;font-weight:900;color:var(--move)">${ar(p.fullDays||0)}</div><div style="color:var(--muted);font-size:10px">🎴 أيام ٤/٤</div>
+      </div>
+    </div>
+    ${catBars}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">📅 التقويم</div>${cal}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">🎖️ الشارات</div>${bgRow}
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">📋 آخر ٧ أيام</div>
+    <div class="daylog">${dlHTML||'<div style="text-align:center;padding:14px;color:var(--muted);font-size:12px">لا يوجد سجل بعد</div>'}</div>
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase">📝 ملاحظة سرية</div>
+    <textarea class="note-a" id="noteTA">${p.note||''}</textarea>
+    <button class="bsn" onclick="saveNote('${p.docId||p.id}')">💾 حفظ الملاحظة</button>
+  `;
+  openM('pdM');
+}
+
+async function saveNote(did){
+  if(!db){toast('Firebase غير متصل','err');return;}
+  const note=document.getElementById('noteTA').value;
+  try{await db.collection('uno_players').doc(did).update({note});const p=players.find(x=>x.docId===did||x.id===did);if(p)p.note=note;toast('✅ حُفظت الملاحظة');}
+  catch(e){toast('خطأ في الحفظ','err');}
+}
+
+// ══════════════════════════════════
+// DELETE
+// ══════════════════════════════════
+async function delPlayer(did,nm){
+  if(!confirm(`حذف ${nm}؟ لا يمكن التراجع!`))return;
+  if(!db){toast('Firebase غير متصل','err');return;}
+  try{await db.collection('uno_players').doc(did).delete();players=players.filter(p=>p.docId!==did&&p.id!==did);renderAll();toast(`✅ حُذفت ${nm}`);}
+  catch(e){toast('خطأ في الحذف','err');}
+}
+
+// ══════════════════════════════════
+// IMPORT
+// ══════════════════════════════════
+async function importCode(){
+  const code=document.getElementById('impC').value.trim();
+  if(!code){toast('الصقي الكود','err');return;}
+  let data;
+  try{data=JSON.parse(decodeURIComponent(atob(code)));}catch(e){toast('الكود غير صحيح','err');return;}
+  if(!data.name){toast('بيانات ناقصة','err');return;}
+  if(!db){toast('Firebase غير متصل','err');return;}
+  const id=(data.email||data.name).replace(/[.@+\s]/g,'_');
+  try{
+    await db.collection('uno_players').doc(id).set({...data,lastUpdated:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+    toast(`✅ تم استيراد ${data.name}`);closeM('impM');document.getElementById('impC').value='';loadAll();
+  }catch(e){toast('خطأ في الاستيراد','err');}
+}
+
+// ══════════════════════════════════
+// ADD PLAYER
+// ══════════════════════════════════
+async function addPlayer(){
+  const nm=(document.getElementById('fN').value||'').trim();
+  if(!nm){toast('أدخلي الاسم','err');return;}
+  if(!db){toast('Firebase غير متصل','err');return;}
+  const id='p_'+Date.now();
+  const data={id,name:nm,pts:parseInt(document.getElementById('fP').value)||0,day:parseInt(document.getElementById('fD').value)||0,streak:parseInt(document.getElementById('fS').value)||0,fullDays:0,totalDone:0,wildCount:0,skipCount:0,altCount:0,earnedBadges:[],dayLog:[],catStats:{food:0,water:0,move:0,rest:0},goals:[],note:'',lastUpdated:firebase.firestore.FieldValue.serverTimestamp()};
+  try{await db.collection('uno_players').doc(id).set(data);toast(`✅ تمت إضافة ${nm}`);closeM('addM');loadAll();}
+  catch(e){toast('خطأ في الإضافة','err');}
+}
+
+// ══════════════════════════════════
+// WEEKLY CHALLENGE
+// ══════════════════════════════════
+async function loadWeeklyChallengeAdmin(){
+  if(!db)return;
+  try{
+    const doc=await db.collection('app_settings').doc('weekly_challenge').get();
+    if(!doc.exists)return;
+    const d=doc.data();
+    if(d){
+      document.getElementById('wcTitle').value=d.title||'';
+      document.getElementById('wcDesc').value=d.desc||'';
+      document.getElementById('wcActive').checked=!!d.active;
+      if(d.title){
+        document.getElementById('wcCurrent').style.display='block';
+        document.getElementById('wcCurT').textContent=d.title;
+        document.getElementById('wcCurS').textContent=d.desc||'';
+      }
+    }
+  }catch(e){}
+}
+
+async function saveWeeklyChallenge(){
+  if(!db){toast('Firebase غير متصل','err');return;}
+  const title=(document.getElementById('wcTitle').value||'').trim();
+  const desc=(document.getElementById('wcDesc').value||'').trim();
+  const active=document.getElementById('wcActive').checked;
+  try{
+    await db.collection('app_settings').doc('weekly_challenge').set({title,desc,active,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    document.getElementById('wcCurrent').style.display=title?'block':'none';
+    document.getElementById('wcCurT').textContent=title;
+    document.getElementById('wcCurS').textContent=desc;
+    toast('✅ تم حفظ تحدي الأسبوع!');
+  }catch(e){toast('خطأ في الحفظ','err');}
+}
+
+// ══════════════════════════════════
+// MODAL + UTILS
+// ══════════════════════════════════
+function openM(id){document.getElementById(id).classList.remove('hide');}
+function closeM(id){document.getElementById(id).classList.add('hide');}
+document.querySelectorAll('.mover').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.add('hide');}));
+
+let _tt=null;
+function toast(msg,type='ok'){
+  const t=document.getElementById('tst');t.textContent=msg;t.className=`tst ${type}`;
+  clearTimeout(_tt);_tt=setTimeout(()=>t.classList.add('hide'),3200);
+}
+
+setInterval(loadAll,30000);
+window.onload=()=>{if(db)startListener();else loadAll();};
+</script>
+</body>
+</html>
